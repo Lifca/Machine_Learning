@@ -1233,6 +1233,7 @@ final_rmse = np.sqrt(final_mse) # => evaluates to 48,209.6
 划分训练集和测试集的方法：
 
 - sklearn.model_selection - train_test_split()
+- sklearn.model_selection - StratifiedShuffleSplit()
 
 处理缺失值的方法：
 
