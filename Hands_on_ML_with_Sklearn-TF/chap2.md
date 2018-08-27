@@ -132,9 +132,9 @@ MAE(\mathbf{X},h)=\frac{1}{m}\sum_{i=1}^{m}\left\vert h(\mathbf{x}^{(i)})-y^{(i)
 $$
 RMSE和MAE都是测量两个向量间距离的方法：预测向量和目标值向量。各种距离测量或范数都是可能的：
 
-- 计算平方和的根（RMSE）对应于**欧几里德范数**（*Euclidian norm*）：这是你熟悉的距离概念。它也被称为ℓ$_2$**范数**（ℓ*$_2$ norm*），记为$\lVert\ \cdot\ \rVert_2$（或只是$\lVert\ \cdot\ \rVert$）。
-- 计算绝对值的和（MAE）对应于ℓ$_1$**范数**（*ℓ$_1$ norm*），记为$\lVert\ \cdot\ \rVert_1$。有时称为**曼哈顿范数**（*Manhattan norm*），因为它测量城市间两点的距离——如果你只能沿着正交的城市街区旅行。
-- 更普遍地，包含个$n$元素的向量$\mathbf{v}$的ℓ$_k$范数定义为：$\lVert \mathbf{v} \rVert=(|v_0|^k+|v_1|^k+\cdots +|v_n|^k)^{\frac{1}{k}}$。ℓ$_0$只给出了向量的基数（即元素的数量），ℓ$_\infty$给出向量中的最大绝对值。
+- 计算平方和的根（RMSE）对应于**欧几里德范数**（*Euclidian norm*）：这是你熟悉的距离概念。它也被称为ℓ2**范数**（ℓ2 *norm*），记为$\lVert\ \cdot\ \rVert_2$（或只是$\lVert\ \cdot\ \rVert$）。
+- 计算绝对值的和（MAE）对应于ℓ1**范数**（ℓ1 *norm*），记为$\lVert\ \cdot\ \rVert_1$。有时称为**曼哈顿范数**（*Manhattan norm*），因为它测量城市间两点的距离——如果你只能沿着正交的城市街区旅行。
+- 更普遍地，包含个$n$元素的向量$\mathbf{v}$的ℓk范数定义为：$\lVert \mathbf{v} \rVert=(|v_0|^k+|v_1|^k+\cdots +|v_n|^k)^{\frac{1}{k}}$。ℓ0只给出了向量的基数（即元素的数量），ℓ$\infty$给出向量中的最大绝对值。
 - 范数的指数越高，它就越关注大的数值，忽略小的数值。这就是RMSE对异常值比MAE更敏感的原因。但是当异常值呈指数级罕见时（如钟形曲线），RMSE表现非常好，通常是首选。
 
 
@@ -287,7 +287,7 @@ def load_housing_data(housing_path=HOUSING_PATH):
 
 ```python
 >>> housing["ocean_proximity"].value_counts()
-<1H OCEAN 9136
+< 1H OCEAN 9136
 INLAND 6551
 NEAR OCEAN 2658
 NEAR BAY 2290
@@ -511,7 +511,7 @@ median_house_value 	1.000000
 median_income 		0.687170
 total_rooms 		0.135231
 housing_median_age 	0.114220
-households 			0.064702
+households			0.064702
 total_bedrooms 		0.047865
 population 		   -0.026699
 longitude 		   -0.047279
