@@ -507,15 +507,15 @@ corr_matrix = housing.corr()
 
 ```python
 >>> corr_matrix["median_house_value"].sort_values(ascending=False)
-median_house_value 	1.000000
-median_income 		0.687170
-total_rooms 		0.135231
-housing_median_age 	0.114220
-households			0.064702
-total_bedrooms 		0.047865
-population 		   -0.026699
-longitude 		   -0.047279
-latitude 		   -0.142826
+median_house_value  1.000000
+median_income       0.687170
+total_rooms         0.135231
+housing_median_age  0.114220
+households          0.064702
+total_bedrooms      0.047865
+population         -0.026699
+longitude          -0.047279
+latitude           -0.142826
 Name: median_house_value, dtype: float64
 ```
 
@@ -745,7 +745,7 @@ from sklearn.base import BaseEstimator, TransformerMixin
 rooms_ix, bedrooms_ix, population_ix, household_ix = 3, 4, 5, 6
 
 class CombinedAttributesAdder(BaseEstimator, TransformerMixin):
-	def __init__(self, add_bedrooms_per_room = True): # no *args or **kargs
+	def __init__(self, add_bedrooms_per_room=True):  # no *args or **kargs
         self.add_bedrooms_per_room = add_bedrooms_per_room
     def fit(self, X, y=None):
 		return self # 其他什么也不做
@@ -761,7 +761,6 @@ class CombinedAttributesAdder(BaseEstimator, TransformerMixin):
 
 attr_adder = CombinedAttributesAdder(add_bedrooms_per_room=False)
 housing_extra_attribs = attr_adder.transform(housing.values)
-
 ```
 
 在这个例子中，转换器有一个超参数，`add_bedrooms_per_room`，默认为`True`（提供一个合理的默认值很有帮助）。这个超参数能让你很容易发现添加的这个属性对机器学习算法是否有帮助。更一般地，你可以为每个不能完全确保的数据准备步骤添加一个超参数，自动化数据准备步骤越多，能尝试自动化的组合越多，就更容易找到一种好的组合（会节省大量时间）。
@@ -836,10 +835,8 @@ full_pipeline = FeatureUnion(transformer_list=[
 ```python
 >>> housing_prepared = full_pipeline.fit_transform(housing)
 >>> housing_prepared
-array([[0.73225807, -0.67331551, 0.58426443, ..., 0.,
-        0., 0.],
-       [-0.99102923, 1.63234656, -0.92655887, ..., 0.,
-        0., 0.],
+array([[0.73225807, -0.67331551, 0.58426443, ..., 0., 0., 0.],
+       [-0.99102923, 1.63234656, -0.92655887, ..., 0., 0., 0.],
        [...]
 >>> housing_prepared.shape
 (16513, 17)
