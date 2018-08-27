@@ -244,13 +244,13 @@ HOUSING_PATH = "datasets/housing"
 HOUSING_URL = DOWNLOAD_ROOT + HOUSING_PATH + "/housing.tgz"
 
 def fetch_housing_data(housing_url=HOUSING_URL, housing_path=HOUSING_PATH):
-	if not os.path.isdir(housing_path):
-		os.makedirs(housing_path)
-	tgz_path = os.path.join(housing_path, "housing.tgz")
-	urllib.request.urlretrieve(housing_url, tgz_path)
-	housing_tgz = tarfile.open(tgz_path)
-	housing_tgz.extractall(path=housing_path)
-	housing_tgz.close()
+    if not os.path.isdir(housing_path):
+        os.makedirs(housing_path)
+    tgz_path = os.path.join(housing_path, "housing.tgz")
+    urllib.request.urlretrieve(housing_url, tgz_path)
+    housing_tgz = tarfile.open(tgz_path)
+    housing_tgz.extractall(path=housing_path)
+    housing_tgz.close()
 ```
 
 现在，当你调用` fetch_housing_data() `，它会在你的工作区创建目录 *datasets/housing* ，下载文件*housing.tgz*，提取*housing.csv*。
@@ -261,8 +261,8 @@ def fetch_housing_data(housing_url=HOUSING_URL, housing_path=HOUSING_PATH):
 import pandas as pd
 
 def load_housing_data(housing_path=HOUSING_PATH):
-	csv_path = os.path.join(housing_path, "housing.csv")
-	return pd.read_csv(csv_path)
+    csv_path = os.path.join(housing_path, "housing.csv")
+    return pd.read_csv(csv_path)
 ```
 
 函数返回包含了所有数据的Pandas DataFrame对象。
@@ -287,7 +287,7 @@ def load_housing_data(housing_path=HOUSING_PATH):
 
 ```python
 >>> housing["ocean_proximity"].value_counts()
-< 1H OCEAN 9136
+<1H OCEAN 9136
 INLAND 6551
 NEAR OCEAN 2658
 NEAR BAY 2290
@@ -341,11 +341,11 @@ plt.show()
 import numpy as np
 
 def split_train_test(data, test_ratio):
-	shuffled_indices = np.random.permutation(len(data))
-	test_set_size = int(len(data) * test_ratio)
-	test_indices = shuffled_indices[:test_set_size]
-	train_indices = shuffled_indices[test_set_size:]
-	return data.iloc[train_indices], data.iloc[test_indices]
+    shuffled_indices = np.random.permutation(len(data))
+    test_set_size = int(len(data) * test_ratio)
+    test_indices = shuffled_indices[:test_set_size]
+    train_indices = shuffled_indices[test_set_size:]
+    return data.iloc[train_indices], data.iloc[test_indices]
 ```
 
 然后，你可以像下面这样使用这个函数：
@@ -366,12 +366,12 @@ def split_train_test(data, test_ratio):
 import hashlib
 
 def test_set_check(identifier, test_ratio, hash):
-	return hash(np.int64(identifier)).digest()[-1] < 256 * test_ratio
+    return hash(np.int64(identifier)).digest()[-1] < 256 * test_ratio
 
 def split_train_test_by_id(data, test_ratio, id_column, hash=hashlib.md5):
-	ids = data[id_column]
-	in_test_set = ids.apply(lambda id_: test_set_check(id_, test_ratio, hash))
-	return data.loc[~in_test_set], data.loc[in_test_set]
+    ids = data[id_column]
+    in_test_set = ids.apply(lambda id_: test_set_check(id_, test_ratio, hash))
+    return data.loc[~in_test_set], data.loc[in_test_set]
 ```
 
 不幸的是，房价数据集并没有识别码这一列。最简单的方法是使用行的索引作为ID：
@@ -416,8 +416,8 @@ from sklearn.model_selection import StratifiedShuffleSplit
 
 split = StratifiedShuffleSplit(n_splits=1, test_size=0.2, random_state=42)
 for train_index, test_index in split.split(housing, housing["income_cat"]):
-	strat_train_set = housing.loc[train_index]
-	strat_test_set = housing.loc[test_index]
+    strat_train_set = housing.loc[train_index]
+    strat_test_set = housing.loc[test_index]
 ```
 
 看看结果是否符合预期。你可以在整个housing数据集中查看收入分类的比例：
@@ -440,7 +440,7 @@ Name: income_cat, dtype: float64
 
 ```python
 for set in (strat_train_set, strat_test_set):
-	set.drop(["income_cat"], axis=1, inplace=True)
+    set.drop(["income_cat"], axis=1, inplace=True)
 ```
 
 我们花了大量时间来生成测试集的原因是：这是一个在机器学习项目中经常被忽略，但是实际很重要的部分。另外，这其中的许多思路对于后面的交叉验证会很有用。接下来进入下一节：探索数据。
@@ -925,7 +925,7 @@ tree_reg.fit(housing_prepared, housing_labels)
 
 ### 使用交叉验证做更好的评估
 
-一种评估决策树模型的方法是使用`train_test_split `函数，来吧训练集划分为更小的训练集和验证集，然后在更小的训练集上训练模型，在验证集上评估模型。这需要一点工作量，不过并不难，效果也很好。
+一种评估决策树模型的方法是使用`train_test_split `函数，来把训练集划分为更小的训练集和验证集，然后在更小的训练集上训练模型，在验证集上评估模型。这需要一点工作量，不过并不难，效果也很好。
 
 另一种方法是用Scikit-Learn的`cross-validation`功能。下面的代码展示了**K折交叉验证**（*K-fold cross-validation*）：随机将训练集分成十个子集，称为“折”，然后训练并评估决策树10次，每次选一个不同的折，用剩下的9折来训练。结果是一个包含10次评估的数组：
 
