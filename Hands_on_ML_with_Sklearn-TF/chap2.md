@@ -569,18 +569,18 @@ housing["population_per_household"]=housing["population"]/housing["households"]
 ```python
 >>> corr_matrix = housing.corr()
 >>> corr_matrix["median_house_value"].sort_values(ascending=False)
-median_house_value 			1.000000
-median_income 				0.687170
-rooms_per_household 		0.199343
-total_rooms 				0.135231
-housing_median_age 			0.114220
-households 					0.064702
-total_bedrooms 				0.047865
+median_house_value          1.000000
+median_income               0.687170
+rooms_per_household         0.199343
+total_rooms                 0.135231
+housing_median_age          0.114220
+households                  0.064702
+total_bedrooms              0.047865
 population_per_household   -0.021984
-population 				   -0.026699
-longitude 				   -0.047279
-latitude 				   -0.142826
-bedrooms_per_room 		   -0.260070
+population                 -0.026699
+longitude                  -0.047279
+latitude                   -0.142826
+bedrooms_per_room          -0.260070
 Name: median_house_value, dtype: float64
 ```
 
@@ -707,13 +707,13 @@ Scikit-Learn提供了`OneHotEncoder`编码器将整数分类值转换为独热�
 
 ```python
 >>> housing_cat_1hot.toarray()
-array([[ 0., 1., 0., 0., 0.],
-	   [ 0., 1., 0., 0., 0.],
-	   [ 0., 0., 0., 0., 1.],
-	   ...,
-	   [ 0., 1., 0., 0., 0.],
-	   [ 1., 0., 0., 0., 0.],
-	   [ 0., 0., 0., 1., 0.]])
+array([[0., 1., 0., 0., 0.],
+       [0., 1., 0., 0., 0.],
+       [0., 0., 0., 0., 1.],
+       ...,
+       [0., 1., 0., 0., 0.],
+       [1., 0., 0., 0., 0.],
+       [0., 0., 0., 1., 0.]])
 ```
 
 使用类`LabelBinarizer`，我们能一步应用两种转换（从文本型到整数分类，再从整数分类到独热向量）：
@@ -724,9 +724,9 @@ array([[ 0., 1., 0., 0., 0.],
 >>> housing_cat_1hot = encoder.fit_transform(housing_cat)
 >>> housing_cat_1hot
 array([[0, 1, 0, 0, 0],
-	   [0, 1, 0, 0, 0],
-	   [0, 0, 0, 0, 1],
-	   ...,
+       [0, 1, 0, 0, 0],
+       [0, 0, 0, 0, 1],
+       ...,
        [0, 1, 0, 0, 0],
        [1, 0, 0, 0, 0],
        [0, 0, 0, 1, 0]])
@@ -745,19 +745,18 @@ from sklearn.base import BaseEstimator, TransformerMixin
 rooms_ix, bedrooms_ix, population_ix, household_ix = 3, 4, 5, 6
 
 class CombinedAttributesAdder(BaseEstimator, TransformerMixin):
-	def __init__(self, add_bedrooms_per_room=True):  # no *args or **kargs
+    def __init__(self, add_bedrooms_per_room = True): # no *args or **kargs
         self.add_bedrooms_per_room = add_bedrooms_per_room
     def fit(self, X, y=None):
-		return self # 其他什么也不做
-	def transform(self, X, y=None):
-		rooms_per_household = X[:, rooms_ix] / X[:, household_ix]
-		population_per_household = X[:, population_ix] / X[:, household_ix]
-		if self.add_bedrooms_per_room:
-			bedrooms_per_room = X[:, bedrooms_ix] / X[:, rooms_ix]
-			return np.c_[X, rooms_per_household, population_per_household,
-						bedrooms_per_room]
-		else:
-			return np.c_[X, rooms_per_household, population_per_household]
+        return self # nothing else to do
+    def transform(self, X, y=None):
+        rooms_per_household = X[:, rooms_ix] / X[:, household_ix]
+        population_per_household = X[:, population_ix] / X[:, household_ix]
+        if self.add_bedrooms_per_room:
+            bedrooms_per_room = X[:, bedrooms_ix] / X[:, rooms_ix]
+            return np.c_[X, rooms_per_household, population_per_household, bedrooms_per_room]
+        else:
+            return np.c_[X, rooms_per_household, population_per_household]
 
 attr_adder = CombinedAttributesAdder(add_bedrooms_per_room=False)
 housing_extra_attribs = attr_adder.transform(housing.values)
@@ -946,9 +945,9 @@ rmse_scores = np.sqrt(-scores)
 ... print("Standard deviation:", scores.std())
 ...
 >>> display_scores(tree_rmse_scores)
-Scores: [ 74678.4916885 64766.2398337 69632.86942005 69166.67693232
-		  71486.76507766 73321.65695983 71860.04741226 71086.32691692
-		  76934.2726093 69060.93319262]
+Scores: [74678.4916885 64766.2398337 69632.86942005 69166.67693232
+         71486.76507766 73321.65695983 71860.04741226 71086.32691692
+         76934.2726093 69060.93319262]
 Mean: 71199.4280043
 Standard deviation: 3202.70522793
 ```
@@ -959,13 +958,13 @@ Standard deviation: 3202.70522793
 
 ```python
 >>> lin_scores = cross_val_score(lin_reg, housing_prepared, housing_labels,
-... scoring="neg_mean_squared_error", cv=10)
+...                             scoring="neg_mean_squared_error", cv=10)
 ...
 >>> lin_rmse_scores = np.sqrt(-lin_scores)
 >>> display_scores(lin_rmse_scores)
-Scores: [ 70423.5893262 65804.84913139 66620.84314068 72510.11362141
-		  66414.74423281 71958.89083606 67624.90198297 67825.36117664
-		  72512.36533141 68028.11688067]
+Scores: [70423.5893262 65804.84913139 66620.84314068 72510.11362141
+         66414.74423281 71958.89083606 67624.90198297 67825.36117664
+         72512.36533141 68028.11688067]
 Mean: 68972.377566
 Standard deviation: 2493.98819069
 ```
@@ -982,9 +981,9 @@ Standard deviation: 2493.98819069
 >>> forest_rmse
 22542.396440343684
 >>> display_scores(forest_rmse_scores)
-Scores: [ 53789.2879722 50256.19806622 52521.55342602 53237.44937943
-		  52428.82176158 55854.61222549 52158.02291609 50093.66125649
-          53240.80406125 52761.50852822]
+Scores: [53789.2879722 50256.19806622 52521.55342602 53237.44937943
+         52428.82176158 55854.61222549 52158.02291609 50093.66125649
+         53240.80406125 52761.50852822]
 Mean: 52634.1919593
 Standard deviation: 1576.20472269
 ```
@@ -1016,13 +1015,17 @@ Standard deviation: 1576.20472269
 
 ```python
 from sklearn.model_selection import GridSearchCV
+
 param_grid = [
     {'n_estimators': [3, 10, 30], 'max_features': [2, 4, 6, 8]},
     {'bootstrap': [False], 'n_estimators': [3, 10], 'max_features': [2, 3, 4]},
 ]
+
 forest_reg = RandomForestRegressor()
+
 grid_search = GridSearchCV(forest_reg, param_grid, cv=5,
                            scoring='neg_mean_squared_error')
+						   
 grid_search.fit(housing_prepared, housing_labels)
 ```
 
@@ -1202,3 +1205,65 @@ final_rmse = np.sqrt(final_mse) # => evaluates to 48,209.6
 3. 尝试在准备管道中增加一个转换器，只需要选择最重要的属性。
 4. 尝试创建一个单独的管道，可以完成数据准备和最终预测。
 5. 用`GridSearchCV`自动探索一些准备过程中的候选项。
+
+## 总结
+
+本章重点：回归任务
+
+回归问题的两种性能指标：
+
+- 均方根误差（RMSE）：sklearn.metrics.mean_squared_error
+
+- 平均绝对误差（MAE）
+
+查看数据的方法：
+
+- Matplotlib：
+
+  - head()：查看前五行数据
+  - info()：查看数据描述（属性及其类型、空值数等）
+  - describe()：数据总览（count、mean、std、min、25%、50%、75%、max）
+  - hist()：画出所有属性的直方图
+  - corr()：计算每对属性间的皮尔逊相关系数
+
+- Pandas：
+
+  - scatter_matrix()：画出数值-数值属性的直方图
+
+划分训练集和测试集的方法：
+
+- sklearn.model_selection - train_test_split()
+
+处理缺失值的方法：
+
+- Pandas.DataFrame：
+  - dropna()：删除含有空值的行/列
+  - drop()：删除整个属性
+  - fillna()：对缺失值进行赋值
+- Sklearn.preprocessing - Imputer类
+
+处理文本数据的方法：
+
+- sklearn.preprocessing - LabelEncoder类
+- sklearn.preprocessing - OneHotEncoder类
+- sklearn.preprocessing - LabelBinarizer类
+
+特征缩放：
+
+- 归一化
+- 标准化
+
+训练模型的方法：
+
+- sklearn.linear_model - LinearRegression：线性回归模型
+- sklearn.tree - DecisionTreeRegressor：决策树模型
+- sklearn.ensemble - RandomForestRegressor：随机森林模型
+
+评估模型的方法：
+
+- 交叉验证：sklearn.model_selection - cross-validation
+
+模型微调的方法：
+
+- sklearn.model_selection - GridSearchCV：网格搜索
+- sklearn.model_selection - RandomizedSearchCV：随机搜索
