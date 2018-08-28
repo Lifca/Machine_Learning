@@ -1256,15 +1256,15 @@ final_rmse = np.sqrt(final_mse) # => evaluates to 48,209.6
 
 训练模型的方法：
 
-- sklearn.linear_model - LinearRegression：线性回归模型
-- sklearn.tree - DecisionTreeRegressor：决策树模型
-- sklearn.ensemble - RandomForestRegressor：随机森林模型
+- 线性回归模型：sklearn.linear_model - LinearRegression
+- 决策树模型：sklearn.tree - DecisionTreeRegressor
+- 随机森林模型：sklearn.ensemble - RandomForestRegressor
 
 评估模型的方法：
 
-- 交叉验证：sklearn.model_selection - cross-validation
+- 交叉验证：sklearn.model_selection - cross_val_score
 
 模型微调的方法：
 
-- sklearn.model_selection - GridSearchCV：网格搜索
-- sklearn.model_selection - RandomizedSearchCV：随机搜索
+- 网格搜索：sklearn.model_selection - GridSearchCV
+- 随机搜索：sklearn.model_selection - RandomizedSearchCV
