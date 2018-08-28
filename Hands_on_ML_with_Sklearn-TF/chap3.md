@@ -87,14 +87,14 @@ X_train, y_train = X_train[shuffle_index], y_train[shuffle_index]
 
 ## 训练二分类器
 
-现在简化一下问题，只尝试识别一个数字——例如，数字5。这个“数字5-检测器	”是一个**二分类器**（*binary classifier*），只能区分两种类别，是5和非5。让我们来为这个分类任务创建目标向量：
+现在简化一下问题，只尝试识别一个数字——例如，数字5。这个“数字5-检测器”是一个**二分类器**（*binary classifier*），只能区分两种类别，是5和非5。让我们来为这个分类任务创建目标向量：
 
 ```python
 y_train_5 = (y_train == 5) # True for all 5s, False for all other digits.
 y_test_5 = (y_test == 5)
 ```
 
-现在让我们挑选一个分类器并训练它。可以用**随即梯度下降**（*Stochastic Gradient Descent*，SGD）分类器作为开始，使用Scikit-Learn的`SGDClassifier`类。这个分类有一个优点，它能高效处理非常大的数据集。部分原因是SGD一次只独立处理一个训练实例（这也使得SGD很好地适应在线学习），我们之后会看到。让我们创建一个`SGDClassifier`，在整个数据集上训练它：
+现在让我们挑选一个分类器并训练它。可以用**随机梯度下降**（*Stochastic Gradient Descent*，SGD）分类器作为开始，使用Scikit-Learn的`SGDClassifier`类。这个分类有一个优点，它能高效处理非常大的数据集。部分原因是SGD一次只独立处理一个训练实例（这也使得SGD很好地适应在线学习），我们之后会看到。让我们创建一个`SGDClassifier`，在整个数据集上训练它：
 
 ```python
 from sklearn.linear_model import SGDClassifier
@@ -293,7 +293,7 @@ array([False], dtype=bool)
 
 ```python
 y_scores = cross_val_predict(sgd_clf, X_train, y_train_5, cv=3,
-							 method="decision_function")
+                             method="decision_function")
 ```
 
 现在有了这些分数，对于任何可能的阈值，你都能用`precision_recall_curve()`函数计算准确率与召回率：
@@ -308,11 +308,11 @@ precisions, recalls, thresholds = precision_recall_curve(y_train_5, y_scores)
 
 ```python
 def plot_precision_recall_vs_threshold(precisions, recalls, thresholds):
-	plt.plot(thresholds, precisions[:-1], "b--", label="Precision")
-	plt.plot(thresholds, recalls[:-1], "g-", label="Recall")
-	plt.xlabel("Threshold")
-	plt.legend(loc="upper left")
-	plt.ylim([0, 1])
+    plt.plot(thresholds, precisions[:-1], "b--", label="Precision")
+    plt.plot(thresholds, recalls[:-1], "g-", label="Recall")
+    plt.xlabel("Threshold")
+    plt.legend(loc="upper left")
+    plt.ylim([0, 1])
     
 plot_precision_recall_vs_threshold(precisions, recalls, thresholds)
 plt.show()
@@ -367,11 +367,11 @@ fpr, tpr, thresholds = roc_curve(y_train_5, y_scores)
 
 ```python
 def plot_roc_curve(fpr, tpr, label=None):
-	plt.plot(fpr, tpr, linewidth=2, label=label)
-	plt.plot([0, 1], [0, 1], 'k--')
-	plt.axis([0, 1, 0, 1])
-	plt.xlabel('False Positive Rate')
-	plt.ylabel('True Positive Rate')
+    plt.plot(fpr, tpr, linewidth=2, label=label)
+    plt.plot([0, 1], [0, 1], 'k--')
+    plt.axis([0, 1, 0, 1])
+    plt.xlabel('False Positive Rate')
+    plt.ylabel('True Positive Rate')
 	
 plot_roc_curve(fpr, tpr)
 plt.show()
