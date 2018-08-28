@@ -392,7 +392,7 @@ plt.show()
 > **提示**
 > 因为ROC曲线和准确率/召回率（PR）曲线很相似，你可能想知道该如何决定用哪个。根据经验，每当正例很稀少，或你更关注假正例时，你应该更偏好PR曲线。其他情况用ROC曲线。例如，看之前的ROC曲线（和ROC AUC数值），你可能会觉得这个分类器很棒。但这主要是因为和反例（非5）相比，正例（5）很少。相反地，PR曲线就> 能清楚表明，分类器还有提升空间（曲线还能更靠近左上角）。
 
-让我们来训练一个`RandomForestClassifier`，用它的ROC曲线和ROC AUC数值和`SGDClassifier`进行比较。首先，你需要得到训练集中每个实例的数值。但由于它的工作方式（见第七章），`RandomForestClassifier`类没有`decision_function()`方法，但有predict_proba()方法。Scikit-Learn分类器通常有两个方法中的一个。`predict_proba()`方法返回一个数组，每行代表一个实例，每列代表一个类，每个都包含了给定的样例属于给定类的概率（例如，图片是5的概率为70%）：
+让我们来训练一个`RandomForestClassifier`，用它的ROC曲线和ROC AUC数值和`SGDClassifier`进行比较。首先，你需要得到训练集中每个实例的数值。但由于它的工作方式（见第七章），`RandomForestClassifier`类没有`decision_function()`方法，但有`predict_proba()`方法。Scikit-Learn分类器通常有两个方法中的一个。`predict_proba()`方法返回一个数组，每行代表一个实例，每列代表一个类，每个都包含了给定的样例属于给定类的概率（例如，图片是5的概率为70%）：
 
 ```python
 from sklearn.ensemble import RandomForestClassifier
@@ -478,7 +478,7 @@ array([ 0., 1., 2., 3., 4., 5., 6., 7., 8., 9.])
 > **警告**
 > 当分类器训练好后，它会把目标类的列表存在`classes_`属性中，按照值排序。在本例中，`class_`数组中每个类的索引都能方便地和类自身匹配（比如，索引为5的类碰巧也是类5），不过通常你不会这么幸运。
 
-如果想强制Scikit-Learn使用一对一或一对所有策略，你可以使用`OneVsOneClassifier`或`OneVsRestClassifier`类。创建一个实例，将二分类器传递给构造器。例如，下面这段代码基于SGDClassifier，使用OvO策略创建了一个多分类器：
+如果想强制Scikit-Learn使用一对一或一对所有策略，你可以使用`OneVsOneClassifier`或`OneVsRestClassifier`类。创建一个实例，将二分类器传递给构造器。例如，下面这段代码基于`SGDClassifier`，使用OvO策略创建了一个多分类器：
 
 ```python
 >>> from sklearn.multiclass import OneVsOneClassifier
@@ -688,3 +688,39 @@ plot_digit(clean_digit)
   
 ## 总结  
 
+显示灰度图像：
+
+- imshow()
+
+显示混淆矩阵图像：
+
+- matshow()
+
+二分类器：
+
+- 随机梯度下降：sklearn.linear_model - SGDClassifier
+  - 设置决策函数的方法：decision_function()
+
+多分类器：
+
+- 一对一策略：sklearn.multiclass - OneVsOneClassifier
+- 一对其余策略：sklearn.multiclass - OneVsRestClassifier
+- 随机森林：sklearn.ensemble - RandomForestClassifier
+- K近邻：klearn.neighbors - KNeighborsClassifier
+
+预测函数：
+
+- sklearn.model_selection - cross_val_predict
+
+混淆矩阵：
+
+- sklearn.metrics - confusion_matrix()
+
+二分类器的指标：
+
+- 准确率：sklearn.metrics - precision_score
+- 召回率：sklearn.metrics - recall_score
+- 合在一起：sklearn.metrics - precision_recall_curve()
+- F1值：sklearn.metrics - f1_score
+- ROC曲线：sklearn.metrics - roc_curve()
+- ROC曲线下面积：sklearn.metrics - roc_auc_score
