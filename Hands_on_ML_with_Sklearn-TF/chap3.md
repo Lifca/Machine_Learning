@@ -418,6 +418,8 @@ plt.legend(loc="bottom right")
 plt.show()
 ```
 
+![7](./images/chap3/3-7.png)
+
 如你在图3-7中所见，`RandomForestClassifier`的ROC曲线看起来比`SGDClassifier`的要好：它更靠近左上角。所以，它的ROC AUC数值也更大：
 
 ```python
@@ -473,5 +475,105 @@ array([ 0., 1., 2., 3., 4., 5., 6., 7., 8., 9.])
 5.0
 ```
 
-> 警告
-> 当分类器训练好后，它会把目标类的列表存在`classes_`属性中，按照值排序。在这种情况下，每个类的index
+> **警告**
+> 当分类器训练好后，它会把目标类的列表存在`classes_`属性中，按照值排序。在本例中，`class_`数组中每个类的索引都能方便地和类自身匹配（比如，索引为5的类碰巧也是类5），不过通常你不会这么幸运。
+
+如果想强制Scikit-Learn使用一对一或一对所有策略，你可以使用`OneVsOneClassifier`或`OneVsRestClassifier`类。创建一个实例，将二分类器传递给构造器。例如，下面这段代码基于SGDClassifier，使用OvO策略创建了一个多分类器：
+
+```python
+>>> from sklearn.multiclass import OneVsOneClassifier
+>>> ovo_clf = OneVsOneClassifier(SGDClassifier(random_state=42))
+>>> ovo_clf.fit(X_train, y_train)
+>>> ovo_clf.predict([some_digit])
+array([ 5.])
+>>> len(ovo_clf.estimators_)
+45
+```
+
+训练`RandomForestClassifier`也一样简单：
+
+```python
+>>> forest_clf.fit(X_train, y_train)
+>>> forest_clf.predict([some_digit])
+array([ 5.])
+```
+
+这次Scikit-Learn不必运行OvO或OvA，因为随机森林分类器可以直接对多分类进行分类。你可以调用`predict_proba()`，得到样例对应类别的概率的列表：
+
+```python
+>>> forest_clf.predict_proba([some_digit])
+array([[ 0.1, 0. , 0. , 0.1, 0. , 0.8, 0. , 0. , 0. , 0. ]])
+```
+
+你能看到分类器很确信它的预测：在数组索引5上的概率为0.8，这意味着模型评估图片有80%的概率代表5。它也认为有可能是0或者3（每个都是10%的概率）。
+
+现在，当然你会想评估这些分类器。像往常一样，你想使用交叉验证。让我们用`cross_val_score() `函数来评估`SGDClassifier`的精度：
+
+```python
+>>> cross_val_score(sgd_clf, X_train, y_train, cv=3, scoring="accuracy")
+array([ 0.84063187, 0.84899245, 0.86652998])
+```
+
+它在所有测试折上的精度都超过84%。如果你使用的是随机的分类器，你会得到10%的精度，所以它的表现还不错，不过你还能做得更好。例如，简单地缩放输入（如第二章中讨论的）会将精度提高到90%：
+
+```python
+>>> from sklearn.preprocessing import StandardScaler
+>>> scaler = StandardScaler()
+>>> X_train_scaled = scaler.fit_transform(X_train.astype(np.float64))
+>>> cross_val_score(sgd_clf, X_train_scaled, y_train, cv=3, scoring="accuracy")
+array([ 0.91011798, 0.90874544, 0.906636 ])
+```
+
+## 误差分析
+
+当然，如果这是个实际的项目，你会遵循机器学习检查表（见附录B）中的步骤：探索准备数据的选项，尝试多种模型，把最好的几个列入名单中，使用`GridSearchCV`调整超参数，尽可能的自动化，就像你在前几章做的那样。我们假设你已经找到一个靠谱的模型，你想要改进它。一种方法是分析误差种类。
+
+首先，你可以看一下混淆矩阵。你需要使用`cross_val_predict()`函数做出预测，然后调用`confusion_matrix()`函数，就像你之前做的那样：
+
+```python
+>>> y_train_pred = cross_val_predict(sgd_clf, X_train_scaled, y_train, cv=3)
+>>> conf_mx = confusion_matrix(y_train, y_train_pred)
+>>> conf_mx
+array([[5725, 3, 24, 9, 10, 49, 50, 10, 39, 4],
+       [2, 6493, 43, 25, 7, 40, 5, 10, 109, 8],
+       [51, 41, 5321, 104, 89, 26, 87, 60, 166, 13],
+       [47, 46, 141, 5342, 1, 231, 40, 50, 141, 92],
+       [19, 29, 41, 10, 5366, 9, 56, 37, 86, 189],
+       [73, 45, 36, 193, 64, 4582, 111, 30, 193, 94],
+       [29, 34, 44, 2, 42, 85, 5627, 10, 45, 0],
+       [25, 24, 74, 32, 54, 12, 6, 5787, 15, 236],
+       [52, 161, 73, 156, 10, 163, 61, 25, 5027, 123],
+       [43, 35, 26, 92, 178, 28, 2, 223, 82, 5240]])
+```
+
+有很多数字。使用Matplotlib的`matshow()`函数，混淆矩阵会以图片的形式呈现，更便于观察：
+
+```python
+plt.matshow(conf_mx, cmap=plt.cm.gray)
+plt.show()
+```
+
+![](./images/chap3/3-matrix.png)
+
+混淆矩阵看起来很好，因为大多数图片都在主对角线上，意味着它们被正确分类了。5看起来比其他数字更暗，说明数据集中5很少，或者分类器在5上的表现不如在其他数字上好。事实上，你可以证实两者皆有之。
+
+让我们把注意力放在绘制误差上。首先，你需要将混淆矩阵中每一个值除以对应类图片的总数，这样你就能比较误差率了，而不是绝对的误差数（这对于有大量数据的类是不公平的）：
+
+```python
+row_sums = conf_mx.sum(axis=1, keepdims=True)
+norm_conf_mx = conf_mx / row_sums
+```
+
+现在让我们用0来填充对角线，只保留被错误分类的数据，再来绘制结果：
+
+```python
+np.fill_diagonal(norm_conf_mx, 0)
+plt.matshow(norm_conf_mx, cmap=plt.cm.gray)
+plt.show()
+```
+
+![](./images/chap3/3-error.png)
+
+你能清楚看到分类器制造的各种错误。记住，行代表实际的类别，列代表预测的类别。8和9类的列都特别亮，这告诉你许多图片被错误分类为8或者9。类似的，8和9类的行也很亮，这告诉你8和9经常被误认为是其他数字。相反，一些行格外暗，比如第一行：这意味着大部分1都被正确分类了（一些错误分类为8）。注意误差不是完美对称的，例如，相比8被错误分类为5的情况，有更多的5被错误分类为8。
+
+分析混淆矩阵能给你一些改进分类器的见解。图片看起来，你应该努力改善8和9的分类，
