@@ -18,22 +18,22 @@
 
 ## 线性回归
 
-在第一章中，我们介绍了一个简单的生活满意度回归模型：$life_satisfaction=\theta_0+\theta_1\times GDP_per_capita$。
+在第一章中，我们介绍了一个简单的生活满意度回归模型：$life\_satisfaction=\theta_0+\theta_1\times GDP\_per\_capita$。
 
 这个模型只是输入特征`GDP_per_capita`的线性函数。$\theta_0$和$\theta_1$是模型的参数。
 
 更普遍的，线性模型通过计算输入特征的权重总和，并加上一个常数**偏置项**（*bias term*）（也称为**截距项**（*intercept term*））来做出预测，如公式4-1：
 
-$$\hat(y)=\theta_0+\theta_1x_1+\theta_2x_2+...+\theta_nx_n$$
+$$\hat{y}=\theta_0+\theta_1x_1+\theta_2x_2+...+\theta_nx_n$$
 
-- $\hat(y)$是预测值。
+- $\hat{y}$是预测值。
 - $n$是特征总数。
 - $x_i$是第i个特征值。
 - $\theta_j$是第j个模型参数（包括偏置项$\theta_0$和特征权重$\theta_0,\theta_1,\theta_2,...,\theta_n$）
 
 可以写成更简短的向量形式，如公式4-2：
 
-$\hat(y)=h_{\theta}(\mathbf{x})=\theta^T·\mathbf{x}$
+$\hat{y}=h_{\theta}(\mathbf{x})=\theta^T·\mathbf{x}$
 
 - $\theta$是模型的参数向量，包括偏置项$\theta_0$和特征权重$\theta_1$到$\theta_n$
 - $\theta^T$是$\theta$的转置（行向量变为列向量）
@@ -41,4 +41,93 @@ $\hat(y)=h_{\theta}(\mathbf{x})=\theta^T·\mathbf{x}$
 - $\theta^T·\mathbf{x}$是$\theta^T$和$\mathbf{x}$的点积
 - $h_{\theta}$是函数的假设值，使用了模型参数$\theta$
 
-这就是线性回归模型，所以我们该如何训练它呢？回想一下，训练模型意味着设置参数，使模型最适合训练集。为此我们需要一种能衡量模型好坏的指标。在第二章中我们已经知道，回归模型最普遍的性能测量是均方根误差（RMSE）（等式2-1）。因此，要训练线性回归模型，你需要找到能最小化RMSE的$\theta$值。在实践中，
+这就是线性回归模型，所以我们该如何训练它呢？回想一下，训练模型意味着设置参数，使模型最适合训练集。为此我们需要一种能衡量模型好坏的指标。在第二章中我们已经知道，回归模型最普遍的性能测量是均方根误差（RMSE）（公式2-1）。因此，要训练线性回归模型，你需要找到能最小化RMSE的$\theta$值。在实践中，最小化均方误差（MSE）比RMSE更普遍，最小化的结果也是一样的（因为使函数最小化的值也使它的平方根最小化）。
+
+在训练集$\mathbf{X}$上，线性模型的假设值$h_{\theta}$的 MSE 用公式4-3来计算：
+
+$$MSE(\mathbf{X},h_{\theta})=\frac{1}{m}\sum^m_{i=1}(\theta^T·\mathbf{x}^{(i)}-y^{(i)})^2$$
+
+大多数公式都在第二章中（见“公式”）。主要的不同是我们把$h$写成$h_{\theta}$，以便能清楚表明模型是由向量$\theta$参数化的。为了简化公式，我们用$MES(\theta)$代替$MSE(\mathbf{X},h_{\theta})$。
+
+### 正规方程
+
+为了找到能最小化损失函数的$\theta$值，可以使用**闭式解**（*closed-form solution*）——换言之，通过数学公式直接得到解。这被称为**正规方程**（*Normal Equation*）（公式4-4）：
+
+$$\hat{\theta}=(\mathbf{X}^T·\mathbf{X})^{-1}$·\mathbf{X}^T·y$$
+
+- $\hat{\theta}$是最小化损失函数的$\theta$值
+- $y$是目标值的向量，包含$y^{(1)}$到y^{(m)}
+
+让我们来生成一些近似线性的数据，在图4-1上测试这个公式：
+
+```python
+import numpy as np
+
+X = 2 * np.random.rand(100, 1)
+y = 4 + 3 * X + np.random.randn(100, 1)
+```
+
+![1](./images/chap4/4-1.png)
+
+现在通过正规方程来计算$\theta$。我们会从NumPy的线性代数模块（`np.linalg`）中使用`inv()`函数计算矩阵的逆，`dot()`方法计算矩阵乘法。
+
+```python
+X_b = np.c_[np.ones((100, 1)), X] # add x0 = 1 to each instance
+theta_best = np.linalg.inv(X_b.T.dot(X_b)).dot(X_b.T).dot(y)
+```
+
+我们用来生成数据的实际函数是$y=4+3x_0+高斯噪音$。来看看正规方程发现了什么：
+
+```python
+>>> theta_best
+array([[ 4.21509616],
+[ 2.77011339]])
+```
+
+我们希望得到$\theta_0=4$和$\theta_1=3$，而不是$\theta_0=4.215$和$\theta_1=2.770$。很接近了，但噪音使它无法恢复原函数的确切参数值。
+
+现在你可以用$\hat{\theta}$来进行预测了：
+
+```python
+>>> X_new = np.array([[0], [2]])
+>>> X_new_b = np.c_[np.ones((2, 1)), X_new] # add x0 = 1 to each instance
+>>> y_predict = X_new_b.dot(theta_best)
+>>> y_predict
+array([[4.21509616],
+       [9.75532293]])
+```
+
+来绘制模型的预测（图4-2）：
+
+```python
+plt.plot(X_new, y_predict, "r-")
+plt.plot(X, y, "b.")
+plt.axis([0, 2, 0, 15])
+plt.show()
+```
+
+![2](./images/chap4/4-2.png)
+
+使用下面的 Scikit-Learn 代码可以达到相同的效果：
+
+```python
+>>> from sklearn.linear_model import LinearRegression
+>>> lin_reg = LinearRegression()
+>>> lin_reg.fit(X, y)
+>>> lin_reg.intercept_, lin_reg.coef_
+(array([ 4.21509616]), array([[ 2.77011339]]))
+>>> lin_reg.predict(X_new)
+array([[4.21509616],
+       [9.75532293]])
+```
+
+### 运算复杂度
+
+正规方程计算`\mathbf{X}^T·\mathbf{X}`的逆，它是个n×n的矩阵（n是特征的数量）。对这个矩阵求逆的运算复杂度在$O(n^{2.4})$和$O(n^3)$之间（取决于具体应用）。换言之，如果特征数量翻倍，运算时间会变为原来的$2^{2.4}=5.3$到$2^3=8$倍。
+
+> **警告**
+> 当特征的数量很大时（比如100000），正规方程会变得很慢。
+
+好的一方面是，这个公式在训练集上对于实例而言是线性的（复杂度为$O_$），只要内存足够，就能高效处理大批数据。
+
+同时，只要你训练过线性模型（），
