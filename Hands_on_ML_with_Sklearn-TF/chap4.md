@@ -244,7 +244,7 @@ t0, t1 = 5, 50  #learning_schedule的超参数
 def learning_schedule(t):
     return t0 / (t + t1)
 
-theta = np.random.randn(2,1)
+theta = np.random.randn(2,1)	# random initialization
 
 for epoch in range(n_epochs):
     for i in range(m):
@@ -314,4 +314,42 @@ y = 0.5 * X**2 + X + 2 + np.random.randn(m, 1)
 
 ![12](./images/chap4/4-12.png)
 
-很明显，直线永远也不能合适地拟合这些数据。
+很明显，直线永远也不能合适地拟合这些数据。所以使用Scikit-Learn的`PolynomialFeatures`类来转换训练数据，在训练集中增加每个特征的平方（2次多项式）作为新特征（在本例中只有一个特征）：
+
+```python
+>>> from sklearn.preprocessing import PolynomialFeatures
+>>> poly_features = PolynomialFeatures(degree=2,include_bias=False)
+>>> X_poly = poly_features.fit_transform(X)
+>>> X[0]
+array([-0.75275929])
+>>> X_poly[0]
+array([-0.75275929, 0.56664654])
+```
+
+`X_poly`包含`x`的原始特征和它的平方。现在你能用`LinearRegression`模型来拟合扩展的训练集了（图4-13）：
+
+```python
+>>> lin_reg = LinearRegression()
+>>> lin_reg.fit(X_poly, y)
+>>> lin_reg.intercept_, lin_reg.coef_
+(array([ 1.78134581]), array([[ 0.93366893, 0.56456263]]))
+```
+
+![13](./images/chap4/4-13.png)
+
+还不错：模型估计$\hat y=0.56x_1^2+0.93x_1+1.78$，实际上原始函数是$y=0.5x_1^2+1.0x_1+2.0+Gaussian noise$。
+
+注意，当有多个特征时，多项式回归能找到特征之间的关系（这是普通的线性回归模型做不到的）。这是因为`PolynomialFeatures`增加了给定阶数的所有特征的组合。例如，如果有两个特征$a$和$b$，3阶的`PolynomialFeatures`不仅会增加特征$a^2$，$a^3$，$b^2$和$b^3$，也有组合$ab$，$a^2b$和$ab^2$。
+
+> **警告**
+> d阶的`PolynomialFeatures`将包含$n$个特征的数组转换为包含$\frac{(n+d)!}{d!n!}$个特征的数组，$n!$是n的阶乘（*factorial*），等于$1\times 2\times ... \times n$。当心特征数量的组合爆炸！
+
+## 学习曲线
+
+如果你使用高阶的多项式回归，它拟合数据的效果可能会比普通的线性回归模型更好。例如，图4-14在之前的训练集上使用了300阶的多项式模型，把它和纯线性模型、二项式模型进行比较。注意300阶的多项式模型是如何扭动而尽可能接近训练实例的。
+
+![14](./images/chap4/4-14.png)
+
+当然，高阶的多项式模型严重过拟合训练数据，而线性模型则欠拟合了。在本例中泛化最好的模型是二次项模型。因为数据是由二项式生成的，不过通常你不会知道是什么函数生成的数据，所以你该如何决定你的模型有多复杂？你该怎么知道自己的模型是过拟合还是欠拟合？
+
+在第二章中，你使用交叉验证来得到模型泛华性能的
