@@ -453,5 +453,5 @@ $$J(\theta)=MSE(\theta)+\alpha\frac{1}{2}\sum_{i=1}^{n}\theta_i^2$$
 
 ![17](./images/chap4/4-17.png)
 
-$$\hat\theta=(\mathbf{X}\dot\mathbf{X}+\alpha\mathbf{A})^{-1}\dot\mathbf{X}^T\doty$$
+$$\hat\theta=(\mathbf{X}\dot \mathbf{X}+\alpha\mathbf{A})^{-1}\dot \mathbf{X}^T\doty$$
 
