@@ -37,7 +37,7 @@ $\hat{y}=h_{\theta}(\mathbf{x})=\theta^T·\mathbf{x}$
 
 - $\theta$是模型的参数向量，包括偏置项$\theta_0$和特征权重$\theta_1$到$\theta_n$
 - $\theta^T$是$\theta$的转置（行向量变为列向量）
-- $\mathbf{x}$是特征向量的实例，包括$x_0$到$x_n$，且$x_0$恒为0
+- $\mathbf{x}$是特征向量的实例，包括$x_0$到$x_n$，且$x_0$恒为零
 - $\theta^T·\mathbf{x}$是$\theta^T$和$\mathbf{x}$的点积
 - $h_{\theta}$是函数的假设值，使用了模型参数$\theta$
 
@@ -138,7 +138,7 @@ array([[4.21509616],
 
 **梯度下降**（*Gradient Descent*）是一种非常通用的优化算法，能在许多问题中找到最优解。梯度下降的整体思路是通过迭代调整参数，使损失函数最小化。
 
-假设你在迷雾弥漫的山中迷路了，你只能感觉到脚下土地的坡度。为了快速到达山底，最好的策略是沿着最陡的坡度下山。这就是梯度下降所做的事：它测量误差函数关于参数向量$\theta$的局部梯度，沿着梯度下降的方向前进。一旦梯度为0，你就得到了最小值。
+假设你在迷雾弥漫的山中迷路了，你只能感觉到脚下土地的坡度。为了快速到达山底，最好的策略是沿着最陡的坡度下山。这就是梯度下降所做的事：它测量误差函数关于参数向量$\theta$的局部梯度，沿着梯度下降的方向前进。一旦梯度为零，你就得到了最小值。
 
 具体来说，首先把$\theta_0$置为随机值（成为**随机初始化**（*random initialization*）），然后慢慢改善它，一次一小步，每一步都尝试减小损失函数（比如，MSE），直到算法收敛到一个最小值（见图4-3）。
 
@@ -455,3 +455,37 @@ $$J(\theta)=MSE(\theta)+\alpha\frac{1}{2}\sum_{i=1}^{n}\theta_i^2$$
 
 $$\hat\theta=(\mathbf{X}\dot \mathbf{X}+\alpha\mathbf{A})^{-1}\dot \mathbf{X}^T\doty$$
 
+下面的代码是使用Scikit-Learn的闭式解（公式4-9的变形，使用了André-Louis Cholesky的矩阵分解技术）实现的岭回归：
+
+```python
+>>> from sklearn.linear_model import Ridge
+>>> ridge_reg = Ridge(alpha=1, solver="cholesky")
+>>> ridge_reg.fit(X, y)
+>>> ridge_reg.predict([[1.5]])
+array([[ 1.55071465]]
+```
+
+以及使用随机梯度下降的代码：
+
+```python
+>>> sgd_reg = SGDRegressor(penalty="l2")
+>>> sgd_reg.fit(X, y.ravel())
+>>> sgd_reg.predict([[1.5]])
+array([[ 1.13500145]])
+```
+
+超参数`penalty`设定使用的正则项类型。指定"l2"表明你希望随机梯度下降在损失函数中加上一个正则项，数值为权重向量的$\ell_2$范数平方的一半，：这就是普通的岭回归。
+
+### Lasso回归
+
+最小绝对值收敛和选择算子回归（*Least Absolute Shrinkage and Selection Operator Regression*，简称为**Lasso回归**（*Lasso Regression*））是另一种线性回归的正则版本：像岭回归一样，它在损失函数加上一个正则项，不过它使用权重向量的$\ell_1$范数，而不是权重向量的$\ell_2$范数的平方的一半（见公式4-10）。
+
+$$J(\theta)=MSE(\theta)+\alpha\sum_{i=1}^{n}\vert\theta_i\vert$$
+
+图4-18和图4-17一样，但是把岭模型换成了Lasso模型，使用了一个更小的$\alpha$值。
+
+![18](./images/chap4/4-18.png)
+
+Lasso回归一个重要的特性是它趋向于完全消除最不重要特征的权重（即把它们都设为零）。例如，图4-18（$\alpha=10^{-7}$）里右图中的虚线看起来像是二次方程，几乎是线性的：所有高阶多项式特征的权重都为零。换言之，Lasso回归自动实现特征选择并输出稀疏模型（即，非零的权重很少）。
+
+看图4-19，你能知道为什么会是这种情况：在左上角的图，背景等高线（椭圆）
