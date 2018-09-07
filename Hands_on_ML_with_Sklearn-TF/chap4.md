@@ -173,9 +173,9 @@ array([[4.21509616],
 
 ### 批量梯度下降
 
-为了实现梯度下降，你需要计算每一个$\theta_j$下损失函数的梯度。换言之，你需要计算当$\theta_j$变化了一点点时，梯度会改变多少。这被称为**偏导数**（*partial derivative*）。这就像是你面向东方时询问“我脚下的斜率是多少？”，然后面向北方时问相同的问题一样（如果你能想象出一个超过三维的宇宙，所有方向以此类推）。公式4-5计算了损失函数对于参数$\theta_j$的偏导数，记为$\frac{\partical}{\partical{\theta_j}}MSE(\theta)$。
+为了实现梯度下降，你需要计算每一个$\theta_j$下损失函数的梯度。换言之，你需要计算当$\theta_j$变化了一点点时，梯度会改变多少。这被称为**偏导数**（*partial derivative*）。这就像是你面向东方时询问“我脚下的斜率是多少？”，然后面向北方时问相同的问题一样（如果你能想象出一个超过三维的宇宙，所有方向以此类推）。公式4-5计算了损失函数对于参数$\theta_j$的偏导数，记为$\frac{\partial}{\partial{\theta_j}}MSE(\theta)$。
 
-$$\frac{\partical}{\partical{\theta_j}}MSE(\theta)=\frac{2}{m}\sum_{i=1}^{m}(\theta^T\dot x^{(i)}-y^{(i)})x_j^{(i)}$$
+$$\frac{\partial}{\partial{\theta_j}}MSE(\theta)=\frac{2}{m}\sum_{i=1}^{m}(\theta^T\dot x^{(i)}-y^{(i)})x_j^{(i)}$$
 
 你可以使用公式4-6一次性计算所有偏导数，不用单独一个个计算。梯度向量记为$\nabla_{\theta}MSE(\theta)$，包括了损失函数所有的偏导数（每个模型参数一个）。
 
@@ -414,14 +414,19 @@ plot_learning_curves(polynomial_regression, X, y)
 > 一种改善过拟合模型的方法是提供更多的训练数据，直到验证误差与训练误差相等。
 
 > **偏差和方差的权衡**
-
+>
 > 在机器学习中和统计学中有一种重要的理论，模型的泛化误差是三种不同误差的总和：
-
+>
 > **偏差**（*Bias*）
+>
 > 这部分泛化误差是因为错误的假设，比如假设数据是线性的，而实际上是二次的。一个高偏差模型最可能欠拟合训练数据。
+>
 > **方差**（*Variance*）
+>
 > 这部分是因为对训练数据中细微方差的过度敏感。自由度很高的模型（比如高阶多项式模型）很可能有高方差，因此过拟合训练数据。
+>
 > **不可约误差**（*Irreducible error*）
+>
 > 这部分是因为数据本身的噪音。唯一能减少这种误差的方法是清洗数据（比如修复数据源，像是损坏的传感器，或者探测并移除异常值）。
 > 增加模型的复杂度会典型地提高方差，降低偏差。相反地，减少模型的复杂度会提高偏差，降低方差。这就是权衡。
 
@@ -453,7 +458,7 @@ $$J(\theta)=MSE(\theta)+\alpha\frac{1}{2}\sum_{i=1}^{n}\theta_i^2$$
 
 ![17](./images/chap4/4-17.png)
 
-$$\hat\theta=(\mathbf{X}\dot \mathbf{X}+\alpha\mathbf{A})^{-1}\dot \mathbf{X}^T\doty$$
+$$\hat\theta(\mathbf{X}\cdot\mathbf{X}+\alpha\mathbf{A})^{-1}\cdot\mathbf{X}^T\doty$$
 
 下面的代码是使用Scikit-Learn的闭式解（公式4-9的变形，使用了André-Louis Cholesky的矩阵分解技术）实现的岭回归：
 
@@ -488,4 +493,79 @@ $$J(\theta)=MSE(\theta)+\alpha\sum_{i=1}^{n}\vert\theta_i\vert$$
 
 Lasso回归一个重要的特性是它趋向于完全消除最不重要特征的权重（即把它们都设为零）。例如，图4-18（$\alpha=10^{-7}$）里右图中的虚线看起来像是二次方程，几乎是线性的：所有高阶多项式特征的权重都为零。换言之，Lasso回归自动实现特征选择并输出稀疏模型（即，非零的权重很少）。
 
-看图4-19，你能知道为什么会是这样的：在左上角的图中，背景等高线（椭圆）代表未正则化的均方差损失函数（$\alpha=0$），白圈显示了批量梯度下降中损失函数的路径。前景等高线（菱形）代表$\ell_1$惩罚，三角显示了仅在惩罚下（$\alpha=\infty$）批量梯度下降的路径。注意第一次路线是如何到达$\theta_1=0$的，然后往下滚动直到$\theta_2=0$。在右上角的图中，等高线代表加上了$\ell_1$惩罚（$\alpha=0.5$）后同样的损失函数。全局最小值在$\theta_2=0$轴上。批量梯度下降先到达$\theta_2=0$，然后往下滚动直到到达全局最小值。
+看图4-19，你能知道为什么会是这样的：在左上角的图中，背景等高线（椭圆）代表未正则化的均方差损失函数（$\alpha=0$），白圈显示了批量梯度下降中损失函数的路径。前景等高线（菱形）代表$\ell_1$惩罚，三角显示了仅在惩罚下（$\alpha\rightarrow\infty$）批量梯度下降的路径。注意第一次路线是如何到达$\theta_1=0$的，然后往下滚动直到$\theta_2=0$。在右上角的图中，等高线代表加上了$\ell_1$惩罚（$\alpha=0.5$）后同样的损失函数。全局最小值在$\theta_2=0$轴上。批量梯度下降先到达$\theta_2=0$，然后往下滚动直到到达全局最小值。两个底部图和上面的一样，不过使用了$\ell_2$惩罚。正则化后的最小值比未正则化的更接近零，不过权重并未完全消除。
+
+![19](./images/chap4/4-19.png)
+
+> **提示**
+> 在Lasso回归损失函数中，批量梯度下降的路径先下降到低谷后提高，直到终点。这是因为在$\theta_2=0$时，斜率发生了突变。为了真正收敛到全局最小值，你需要慢慢降低学习率。
+
+Lasso损失函数在$\theta_i=0(i=1,,2,...,n)$处不可微分，但是如果你使用子梯度向量（*subgradient vector*）$\mathbf{g}$，梯度下降就能正常运作。公式4-11展示了用于梯度下降中Lasso损失函数的子梯度向量等式。
+
+$$$$
+
+下面是一个使用了Scikit-Learn中`Lasso`类的小例子。你也可以用`SGDRegressor(penalty="l1")`代替。
+
+```python
+>>> from sklearn.linear_model import Lasso
+>>> lasso_reg = Lasso(alpha=0.1)
+>>> lasso_reg.fit(X, y)
+>>> lasso_reg.predict([[1.5]])
+array([ 1.53788174]
+```
+
+### 弹性网络
+
+弹性网络介于岭回归和Lasso回归之间。它的正则项是岭回归和Lasso回归正则项的简单混合，你可以控制混合率$r$。当$r=0$时，弹性网络和岭回归相同，当$r=1$时，弹性网络和Lasso回归相同（见公式4-12）。
+
+$$J(\theta)=MSE(\theta)+r\alpha\sum_{i=1}^n\vert\theta_i\vert+\frac{1-r}{2}\alpha\sum_{i=1}^n\theta_i^2$$
+
+所以，什么时候用普通的线性回归（即，没有任何正则化），什么时候用岭回归、Lasso或者弹性网络呢？一般来说，有一点正则会更好，所以通常应该避免使用普通的线性回归。岭回归是个不错的默认选项，不过如果你怀疑只有少数特征有用，你可以选择Lasso回归或弹性网络，因为它们会将无用特征的权重降低为零。通常来讲，弹性网络要优于Lasso，因为当特征数量大于训练实例数量时，或是特征之间关联很强时，Lasso会表现得不规律。
+
+下面是一个使用了Scikit-Learn的`ElasticNet`（`l1_ratio`和混合率$r$有关）的简短例子：
+
+```python
+>>> from sklearn.linear_model import ElasticNet
+>>> elastic_net = ElasticNet(alpha=0.1, l1_ratio=0.5)
+>>> elastic_net.fit(X, y)
+>>> elastic_net.predict([[1.5]])
+array([ 1.54333232])
+```
+
+### 早期停止法
+
+一种与众不同的调整迭代学习算法（比如梯度下降）的方法是当验证误差到达最小值时尽快停止训练。这被称为**早期停止法**（*early stopping*）。图4-20展示了一个正在使用批量梯度下降训练的复杂模型（本例中是一个高阶多项式回归模型）。当纪元增加，算法开始学习，训练集上的预测误差（RMSE）自然地下降，验证集上的预测误差也一样。不过，一段时间后验证误差不再下降，反而开始回升。这表明模型开始过拟合数据了。有了早期停止法，你能在验证误差到达最小值时尽快停止训练。它是如此简单而高效的正则技术，以至于Geoffrey Hinton将它称为“美丽的免费午餐”。
+
+![20](./images/chap4/4-20.png)
+
+> **笔记**
+> 在随机梯度下降和小批量梯度下降中，曲线没有那么光滑，你可能很难确定它是否到达最小值。一种办法是只在验证误差高于最小值一段时间后（当你确信模型不会再变得更好了）才停止，之后将模型参数回滚到验证误差还在最小值的时候。
+
+下面是早期停止法的基础应用：
+
+```python
+from sklearn.base import clone
+sgd_reg = SGDRegressor(n_iter=1, warm_start=True, penalty=None,learning_rate="constant", eta0=0.0005)
+
+minimum_val_error = float("inf")
+best_epoch = None
+best_model = None
+for epoch in range(1000):
+    sgd_reg.fit(X_train_poly_scaled, y_train)
+    y_val_predict = sgd_reg.predict(X_val_poly_scaled)
+    val_error = mean_squared_error(y_val_predict, y_val)
+    if val_error < minimum_val_error:
+        minimum_val_error = val_error
+        best_epoch = epoch
+        best_model = clone(sgd_reg)
+```
+
+注意，如果设定`warm_start=True`，当`fit()`方法被回调时，它会从停下来的地方继续训练，而不是从头开始。
+
+## 逻辑回归
+
+我们在第一章中讨论过，有些回归算法也能用于分类（反之亦然）。**逻辑回归**（*Logistic Regression*，也称为*Logit	Regression*）用于清除实例属于某一特定类的可能性（比如，邮件属于垃圾邮件的可能性）。如果被清除的可能性大于50%，模型预测实例属于这个类（称为正类，标记为“1”），否则预测它不属于这个类（即，它属于反类，标记为“0”）。这样它就是一个二分类器了。
+
+### 清除可能性
+
+所以它是怎么运作的？
