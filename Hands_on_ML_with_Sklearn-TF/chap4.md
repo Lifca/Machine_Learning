@@ -684,3 +684,12 @@ $$\hat p_k=\sigma(\mathbf{s}(\mathbf{x}))_k=\frac{\exp{s_k(\mathbf{x})}}{\sum_{i
 
 就像逻辑回归分类器一样，Softmax 回归分类器也使用最高估计概率预测类别（就是分数最高的类别），像公式4-21中展示的那样。
 
+<img src="http://latex.codecogs.com/gif.latex?\hat y=\arg \max \sigma(\mathbf{s(\mathbf(x))})_k=\arg \max s_k(\mathbf{x})=\arg \max((\theta^{(k)})^T\cdot \mathbf{x})/>
+
+- *argmax*运算符返回能最大化函数的变量值。在上面的公式中，它返回能最大化估计概率 <img src="http://latex.codecogs.com/gif.latex?\sigma(\mathbf{s(\mathbf(x))})_k/"> 的 $k$ 值。
+
+> **提示**
+> Softmax 回归分类器一次只预测一类（即，它是多分类的，但不是多输出的），所以它只用于判断互斥的类别，像不同种类的植物。你不能用它来识别同一张照片中的多个人。
+
+既然你已经知道模型是如何进行概率估计和预测的了，就让我们来看看训练过程吧。目标是能建立一个在目标类上拥有高概率（因此其他类别的概率很低）的模型。最小化公式4-22中的损失函数，称为**交叉熵**（*cross entropy*），因为当它对目标类的估计概率很低时，它会惩罚模型。交叉熵频繁用于测量待测类与目标类的匹配程度（在后面几章中，我们会多次使用到）。
+
