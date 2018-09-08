@@ -458,7 +458,7 @@ $$J(\theta)=MSE(\theta)+\alpha\frac{1}{2}\sum_{i=1}^{n}\theta_i^2$$
 
 ![17](./images/chap4/4-17.png)
 
-$$\hat\theta(\mathbf{X}\cdot\mathbf{X}+\alpha\mathbf{A})^{-1}\cdot\mathbf{X}^T\doty$$
+$$\hat\theta(\mathbf{X}\cdot\mathbf{X}+\alpha\mathbf{A})^{-1}\cdot\mathbf{X}^T\dot y$$
 
 下面的代码是使用Scikit-Learn的闭式解（公式4-9的变形，使用了André-Louis Cholesky的矩阵分解技术）实现的岭回归：
 
@@ -582,12 +582,105 @@ $$\sigma(t)=\frac{1}{1+\exp(-t)}$$
 
 $$\hat y=\begin{cases}
 0 & \mathrm{if}\  \hat p<0.5,\\ 
-1 & \mathrm{if}\  \hat p\geqslant 0.5.
+1 & \mathrm{if}\  \hat p\geq 0.5.
 \end{cases}
 $$
 
-注意，当$t<0$时$\sigma(t)<0.5$，当$t\geqslant0$时$\sigma(t)\geqslant0.5$，所以如果$\theta^T\cdot \mathbf{x}$为正类，逻辑回归模型预测为1，如果是负类则预测为0。
+注意，当$t<0$时$\sigma(t)<0.5$，当$t\geq0$时$\sigma(t)\geq0.5$，所以如果$\theta^T\cdot \mathbf{x}$为正类，逻辑回归模型预测为1，如果是负类则预测为0。
 
 ### 训练与损失函数
 
-很好，现在你知道逻辑回归是如何进行概率估计和预测的了。不过，它是如何进行训练的？训练的目标是设置参数向量$\theta$，使模型将高概率的估计为正例（$y=1$），低概率的估计为负类（$y=0$）。这个
+很好，现在你知道逻辑回归是如何进行概率估计和预测的了。不过，它是如何进行训练的？训练的目标是设置参数向量$\theta$，使模型估计正例（$y=1$）的概率高，估计负例（$y=0$）的概率低。等式4-16的单个样例$\mathbf{x}$的损失函数体现了这种思路。
+
+$$
+c(\theta)=\begin{cases}
+-\log(\hat p) & \mathrm{if}\ y=1, \\
+-\log(1-\hat p) & \mathrm{if}\  y=0.
+\end{cases}
+$$
+
+这个损失函数是合理的，因为当$t$接近零时，$-\log(t)$变得很大，所以如果模型估计正例的概率接近0，损失会很大，如果估计反例的概率接近1，损失也很大。另一方面，当$t$接近1时，$-log(t)$接近0，所以如果模型估计一个负例的概率接近0，或估计一个正例的概率接近1，那么损失函数也接近0，那么损失接近0，这正是我们想要的。
+
+整个训练集上的损失函数就是在所有训练实例上的平均损失。它可以写成一个表达式（你能很容易证明），称为**对数损失**（*log loss*），如公式4-17所示。
+
+$$J(\theta)=-\frac{1}{m}\sum_{i=1}^m[y^{(i)}\log{(\hat p^{(i)})}+(1-y^{(i)})\log(1-\hat p^{(i)})]$$
+
+坏消息是没有已知的闭式方程可以计算最小化损失函数的$\theta$值，不过好消息是损失函数是凸函数，所以梯度下降（或者其他优化算法）可以找到全局最小值（如果学习率不是很大，并且有充足的等待时间）。公式4-18给出了损失函数关于第$j$个模型参数$\theta_j$的偏导数。
+
+$$\frac{\partial }{\partial \theta_j}J(\theta)=\frac{1}{m}\sum_{i=1}^m(\sigma(\theta^T\cdot\mathbf{x}^{(i)})-y^{(i)})x_j^{(i)}$$
+
+这个公式看起来很像公式4-5：它计算每个实例的预测误差，再乘上第$j$个特征值，然后计算所有训练实例的平均值。一旦你得到了包含所有偏导数的梯度向量，就可以在批量梯度下降算法中使用了。你现在知道如何训练一个逻辑回归模型了。对于随机梯度下降，你一次只用一个实例，对于小批量梯度下降，你一次用一个小批量。
+
+### 决策边界
+
+让我们使用鸢尾花数据集来描绘逻辑回归。这是个著名的数据集，包含 150 种鸢尾花的花瓣和花萼长度，来自三个不同的品种——山鸢尾（Iris-Setosa），变色鸢尾（Iris-Versicolor），维吉尼亚鸢尾（Iris-Virginica）（看图4-22）。
+
+![22](./images/chap4/4-22.png)
+
+来试着建立创建一个分类器，只基于花瓣长度来检测维吉尼亚鸢尾。首先加载数据：
+
+```python
+>>> from sklearn import datasets
+>>> iris = datasets.load_iris()
+>>> list(iris.keys())
+['data', 'target_names', 'feature_names', 'target', 'DESCR']
+>>> X = iris["data"][:, 3:] # petal width
+>>> y = (iris["target"] == 2).astype(np.int)
+```
+
+现在来训练一个逻辑回归模型：
+
+```python
+from sklearn.linear_model import LogisticRegression
+
+log_reg = LogisticRegression()
+log_reg.fit(X, y)
+```
+
+来看看模型对于花瓣长度在 0 到 3 厘米间的鸢尾花的概率估计（图4-23）：
+
+```python
+X_new = np.linspace(0, 3, 1000).reshape(-1, 1)
+y_proba = log_reg.predict_proba(X_new)
+plt.plot(X_new, y_proba[:, 1], "g-", label="Iris-Virginica")
+plt.plot(X_new, y_proba[:, 0], "b--", label="Not Iris-Virginica"
+```
+
+![23](./images/chap4/4-23.png)
+
+维吉尼亚鸢尾花（用三角形表示）的花瓣长度在 1.4 到 2.5 厘米间，而其他鸢尾花（用正方形表示）的花瓣长度通常更小，在 0.1 到 1.8 厘米间。注意，有一部分重叠了。大约在 2 厘米以上时，分类器高度确信这些花是维吉尼亚鸢尾花（输出了很高的概率），而在 1 厘米以下时，它高度确信这些花不是维吉尼亚鸢尾花（“不是维吉尼亚鸢尾花”的概率很高）。在两个极端之间，分类器是不确定的。不过，如果你让它去预测（使用`predict()`方法，而不是`predict_proba()`方法），它会返回最有可能的那个类别。因此，在 1.6 厘米周围，两边的概率都等于 50% 的地方有一条**决策边界**（*decision boundary*）：如果花瓣长度大于 1.6 厘米，分类器会预测这朵花是维吉尼亚鸢尾花，否则就不是（即便它并不确定）：
+
+```python
+>>> log_reg.predict([[1.7], [1.5]])
+array([1, 0])
+```
+
+图4-24展现了相同的数据集，不过这次展示了两种特征：花瓣宽度和长度。一旦训练好，逻辑回归分类器就能基于两种特征，估计一朵新花是维吉尼亚鸢尾花的概率。虚线表示两者概率都是 50% ：这就是模型的决策边界。注意这是一条线性边界。每条平行线代表模型输出的特定概率，从 15%（左下）到 90% （右上）。所有在右上边界上方的花都有超过 90% 的概率是维吉尼亚鸢尾花。
+
+![24](./images/chap4/4-24.png)
+
+就像其他线性模型一样，逻辑回归模型也能使用$\ell_1$或$\ell_2$惩罚来正则化。事实上，Scikit-Learn默认添加了$\ell_2$惩罚。
+
+> **笔记**
+> 在Scikit-Learn的`LogisticRegression`中，控制正则化强度的超参数不是$\alpha$（像其他线性模型一样），而是它的逆：$C$。$C$的值越高，模型的正则化强度越低。
+
+### Softmax 回归
+
+逻辑回归模型可以直接支持多类别分类，无需训练并结合多个二分类器（像第三章中讨论的那样）。这被称为 **Softmax 回归**（*Softmax Regression*），或**多项逻辑回归**（*Multinomial Logistic Regression*）。
+
+思路很简单：对于给定的实例$\mathbf{x}$，Softmax 回归模型首先计算$k$类的分数$s_k(\mathbf{x})$，然后通过应用 softmax 函数（通常也称为归一化指数（*normalized exponential*））来估计每个类的概率。计算$s_k(\mathbf{x})$的等式看起来应该很眼熟，因为它看起来就像线性回归的预测（见公式4-19）。
+
+$$s_k(\mathbf{x})=(\theta^{(k)})^T\cdot \mathbf{x}$$
+
+每个类都有自己的专用参数向量$\theta^{(k)}$。所有的向量都都以行的形式储存在参数矩阵$\Theta$中。
+
+一旦你算出了每个类中每个实例$\mathbf{x}$的的分数，你就可以通过 softmax 函数（公式4-20）估计实例属于类别$k$的概率\hat p_k$$：它计算每个分数的指数，然后把它们归一化（除以所有指数的总和）。
+
+$$\hat p_k=\sigma(\mathbf{s}(\mathbf{x}))_k=\frac{\exp{s_k(\mathbf{x})}}{\sum_{i=1}^K \exp(s_j(\mathbf{x}))}$$
+
+- $K$ 是类别的总数。
+- $\mathbf{s}(\mathbf{x})$ 是包含了每个类中的每个实例 $\mathbf{x}$ 的分数的向量。
+- $\sigma(\mathbf{s}(\mathbf{x}))_k$ 是给定每一类的分数后，实例 $\mathbf{x}$ 属于类别 $k$ 的估计概率。
+
+就像逻辑回归分类器一样，Softmax 回归分类器也使用最高估计概率预测类别（就是分数最高的类别），像公式4-21中展示的那样。
+
