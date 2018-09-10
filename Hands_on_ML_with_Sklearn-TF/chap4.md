@@ -126,7 +126,7 @@ array([[4.21509616],
 正规方程计算 ![](http://latex.codecogs.com/gif.latex?%5Cmathbf%7BX%7D%5ET%B7%5Cmathbf%7BX%7D) 的逆，它是个 ![](http://latex.codecogs.com/gif.latex?n%5Ctimes%20n) 的矩阵（ ![](http://latex.codecogs.com/gif.latex?n) 是特征的数量）。对这个矩阵求逆的运算复杂度在 ![](http://latex.codecogs.com/gif.latex?O%28n%5E%7B2.4%7D%29) 和 ![](http://latex.codecogs.com/gif.latex?O%28n%5E3%29) 之间（取决于具体应用）。换言之，如果特征数量翻倍，运算时间会变为原来的 ![](http://latex.codecogs.com/gif.latex?2^{2.4}=5.3) 到 ![](http://latex.codecogs.com/gif.latex?2^3=8) 倍。
 
 > **警告**
-> 当特征的数量很大时（比如100000），正规方程会变得很慢。
+> 当特征的数量很大时（比如 100000 ），正规方程会变得很慢。
 
 好的一方面是，这个公式在训练集上对于实例而言是线性的（复杂度为 ![](http://latex.codecogs.com/gif.latex?O(m)) ，只要内存足够，就能高效处理大批数据。
 
@@ -138,9 +138,9 @@ array([[4.21509616],
 
 **梯度下降**（*Gradient Descent*）是一种非常通用的优化算法，能在许多问题中找到最优解。梯度下降的整体思路是通过迭代调整参数，使损失函数最小化。
 
-假设你在迷雾弥漫的山中迷路了，你只能感觉到脚下土地的坡度。为了快速到达山底，最好的策略是沿着最陡的坡度下山。这就是梯度下降所做的事：它测量误差函数关于参数向量$\theta$的局部梯度，沿着梯度下降的方向前进。一旦梯度为零，你就得到了最小值。
+假设你在迷雾弥漫的山中迷路了，你只能感觉到脚下土地的坡度。为了快速到达山底，最好的策略是沿着最陡的坡度下山。这就是梯度下降所做的事：它测量误差函数关于参数向量 ![](http://latex.codecogs.com/gif.latex?\theta) 的局部梯度，沿着梯度下降的方向前进。一旦梯度为零，你就得到了最小值。
 
-具体来说，首先把$\theta_0$置为随机值（成为**随机初始化**（*random initialization*）），然后慢慢改善它，一次一小步，每一步都尝试减小损失函数（比如，MSE），直到算法收敛到一个最小值（见图4-3）。
+具体来说，首先把 ![](http://latex.codecogs.com/gif.latex?\theta_0) 置为随机值（成为**随机初始化**（*random initialization*）），然后慢慢改善它，一次一小步，每一步都尝试减小损失函数（比如，MSE），直到算法收敛到一个最小值（见图4-3）。
 
 ![3](./images/chap4/4-3.png)
 
@@ -173,18 +173,18 @@ array([[4.21509616],
 
 ### 批量梯度下降
 
-为了实现梯度下降，你需要计算每一个$\theta_j$下损失函数的梯度。换言之，你需要计算当$\theta_j$变化了一点点时，梯度会改变多少。这被称为**偏导数**（*partial derivative*）。这就像是你面向东方时询问“我脚下的斜率是多少？”，然后面向北方时问相同的问题一样（如果你能想象出一个超过三维的宇宙，所有方向以此类推）。公式4-5计算了损失函数对于参数$\theta_j$的偏导数，记为$\frac{\partial}{\partial{\theta_j}}MSE(\theta)$。
+为了实现梯度下降，你需要计算每一个 ![](http://latex.codecogs.com/gif.latex?\theta_j) 下损失函数的梯度。换言之，你需要计算当 ![](http://latex.codecogs.com/gif.latex?\theta_j) 变化了一点点时，梯度会改变多少。这被称为**偏导数**（*partial derivative*）。这就像是你面向东方时询问“我脚下的斜率是多少？”，然后面向北方时问相同的问题一样（如果你能想象出一个超过三维的宇宙，所有方向以此类推）。公式4-5计算了损失函数对于参数 ![](http://latex.codecogs.com/gif.latex?\theta_j) 的偏导数，记为 ![](http://latex.codecogs.com/gif.latex?%5Cfrac%7B%5Cpartial%7D%7B%5Cpartial%7B%5Ctheta_j%7D%7D%5Cmathrm%7BMSE%7D%28%5Ctheta%29) 。
 
 ![](http://latex.codecogs.com/gif.latex?%5Cfrac%7B%5Cpartial%7D%7B%5Cpartial%7B%5Ctheta_j%7D%7D%5Cmathrm%7BMSE%7D%28%5Ctheta%29%3D%5Cfrac%7B2%7D%7Bm%7D%5Csum_%7Bi%3D1%7D%5E%7Bm%7D%28%5Ctheta%5ET%5Ccdot%20%5Cmathbf%7Bx%7D%5E%7B%28i%29%7D-y%5E%7B%28i%29%7D%29x_j%5E%7B%28i%29%7D)
 
-你可以使用公式4-6一次性计算所有偏导数，不用单独一个个计算。梯度向量记为$\nabla_{\theta}MSE(\theta)$，包括了损失函数所有的偏导数（每个模型参数一个）。
+你可以使用公式4-6一次性计算所有偏导数，不用单独一个个计算。梯度向量记为 ![](http://latex.codecogs.com/gif.latex?%5Cnabla_%7B%5Ctheta%7D%5Cmathrm%7BMSE%7D%28%5Ctheta%29) ，包括了损失函数所有的偏导数（每个模型参数一个）。
 
 ![](http://latex.codecogs.com/gif.latex?%5Cnabla_%7B%5Ctheta%7D%5Cmathrm%7BMSE%7D%28%5Ctheta%29%3D%5Cbegin%7Bpmatrix%7D%20%5Cfrac%7B%5Cpartial%20%7D%7B%5Cpartial%20%5Ctheta_0%7D%5Cmathrm%7BMSE%7D%28%5Ctheta%29%5C%5C%20%5Cfrac%7B%5Cpartial%20%7D%7B%5Cpartial%20%5Ctheta_1%7D%5Cmathrm%7BMSE%7D%28%5Ctheta%29%5C%5C%20%5Cvdots%20%5C%5C%20%5Cfrac%7B%5Cpartial%20%7D%7B%5Cpartial%20%5Ctheta_n%7D%5Cmathrm%7BMSE%7D%28%5Ctheta%29%20%5Cend%7Bpmatrix%7D%3D%5Cfrac%7B2%7D%7Bm%7D%5Cmathbf%7BX%7D%5ET%5Ccdot%28%5Cmathbf%7BX%7D%5Ccdot%20%5Ctheta-%5Cmathbf%7By%7D%29)
 
 > **警告**
 > 注意，这个方程在每一步梯度下降计算时都使用了整个训练集X！这也就是算法被称为**批量梯度下降**（*Batch Gradient Descent*）的原因：每一步都使用全部训练集。所以它在大数据集上运行得很慢（不过我们马上就会介绍更快的梯度下降算法）。然而，梯度下降的运算规模和特征数量成正比。当有成百上千的特征时，使用梯度下降训练线性回归模型要比正规方程快很多。
 
-一旦你得到梯度向量，如果它是上坡的，那就沿相反方向下坡。这就意味着从$\theta$减去$\nabla_{\theta}MSE(\theta)$。这就是学习率$\eta$发挥作用的地方：梯度向量和$\eta$的乘积决定了下坡时的步长（公式4-7）。
+一旦你得到梯度向量，如果它是上坡的，那就沿相反方向下坡。这就意味着从 ![](http://latex.codecogs.com/gif.latex?\theta) 减去 ![](http://latex.codecogs.com/gif.latex?%5Cnabla_%7B%5Ctheta%7D%5Cmathrm%7BMSE%7D%28%5Ctheta%29) 。这就是学习率 ![](http://latex.codecogs.com/gif.latex?\eta) 发挥作用的地方：梯度向量和 ![](http://latex.codecogs.com/gif.latex?\eta) 的乘积决定了下坡时的步长（公式4-7）。
 
 ![](http://latex.codecogs.com/gif.latex?%5Ctheta%5E%7B%5Cmathrm%7Bnext%5C%20step%7D%7D%3D%5Ctheta-%5Ceta%5Cnabla_%7B%5Ctheta%7D%5Cmathrm%7BMSE%7D%28%5Ctheta%29)
 
@@ -202,7 +202,7 @@ for iteration in range(n_iterations):
 	theta = theta - eta * gradients
 ```
 
-不是很难！来看看最终结果$\theta$：
+不是很难！来看看最终结果 ![](http://latex.codecogs.com/gif.latex?\theta) ：
 
 ```python
 >>> theta
@@ -218,10 +218,10 @@ array([[ 4.21509616],
 
 为了找到一种好的学习率，你可以使用网格搜索（见第二章）。不过，你也许想限制迭代次数，让网格搜索筛掉收敛时间过久的模型。
 
-你也许想知道如何设置迭代次数。如果次数太少，当算法结束时，你仍然离最优解很远，不过如果次数太多，当模型参数不再改变时，你会浪费许多时间。一种简单的方法是设定一个非常大的迭代次数，但当梯度向量变得很小时停止迭代——“很小”就是小于一个极小值$\epsilon$（称为容差（*tolerance*））——这时候梯度下降就（几乎）达到了最小值。
+你也许想知道如何设置迭代次数。如果次数太少，当算法结束时，你仍然离最优解很远，不过如果次数太多，当模型参数不再改变时，你会浪费许多时间。一种简单的方法是设定一个非常大的迭代次数，但当梯度向量变得很小时停止迭代——“很小”就是小于一个极小值 ![](http://latex.codecogs.com/gif.latex?\epsilon) （称为容差（*tolerance*））——这时候梯度下降就（几乎）达到了最小值。
 
 > **收敛率**
-> 当损失函数是凸函数，并且斜率不会突变时（就像均方差损失函数），那么学习率固定的批量梯度下降有一个$O(\frac{1}{iterations})$的收敛率。换言之，如果你把$\epsilon$缩小10倍（为了得到更精确的解），那么算法的迭代次数会增加10倍。
+> 当损失函数是凸函数，并且斜率不会突变时（就像均方差损失函数），那么学习率固定的批量梯度下降有一个 ![](http://latex.codecogs.com/gif.latex?O%28%5Cfrac%7B1%7D%7B%5Cmathrm%7Biterations%7D%7D%29) 的收敛率。换言之，如果你把 ![](http://latex.codecogs.com/gif.latex?\epsilon) 缩小10倍（为了得到更精确的解），那么算法的迭代次数会增加10倍。
 
 ### 随机梯度下降
 
@@ -256,21 +256,21 @@ for epoch in range(n_epochs):
         theta = theta - eta * gradiens
 ```
 
-按照惯例，我们一般迭代m轮，每一轮都称为一代（*epoch*）。当批量梯度下降需要在训练集上迭代100次时，这段代码只需要迭代50次就能得到不错的解。
-
+按照惯例，我们一般迭代m轮，每一轮都称为一代（*epoch*）。当批量梯度下降需要在训练集上迭代 100 次时，这段代码只需要迭代 50 次就能得到不错的解。
+ 
 ```python
 >>> theta
 array([[4.21076011],
        [2.74856079]])
 ```
 
-图4-10展现了训练的前10步（注意它们的不规则性）。
+图4-10展现了训练的前 10 步（注意它们的不规则性）。
 
 ![10](./images/chap4/4-10.png)
 
 注意，尽管实例是随机挑选的，在每一代中，相同的实例可能会被挑选数次，而其他的一些可能从未被选中。如果你想确保在每一代中算法能遍历所有的实例，另一种方法是打乱训练集，再逐个遍历所有实例，然后再次打乱，以此类推。不过，这样会收敛得更慢。
 
-要使用Scikit-Learn的SGD来实现线性回归，你可以使用`SGDRegressor`类，它默认最优化均方差损失函数。下面的代码会迭代50次，以0.1的学习率开始（`eta0=0.1`），使用默认的学习进度（和之前的不同），不使用任何正则化（`penalty=None`，还有更多细节）
+要使用 Scikit-Learn 的 SGD 来实现线性回归，你可以使用`SGDRegressor`类，它默认最优化均方差损失函数。下面的代码会迭代 50 次，以 0.1 的学习率开始（`eta0=0.1`），使用默认的学习进度（和之前的不同），不使用任何正则化（`penalty=None`，还有更多细节）
 
 ```python
 from sklearn.linear_model import SGDRegressor
@@ -287,9 +287,9 @@ sgd_reg.fit(X,y.ravel())
 
 ### 小批量梯度下降
 
-我们最后要介绍的算法是**小批量梯度下降**(*Mini-batch Gradient Descent*)。当你知道批量梯度下降和随机梯度下降后，它就好理解多了：在每一步中，它不像批量梯度下降，在整个训练集上计算梯度，也不像随机梯度下降，只在一个实例上计算梯度，小批量梯度下降在少量随机实例集（被称为小批量）上计算梯度。小批量梯度下降胜过随机梯度下降的主要优点是，你可以得到进行矩阵运算的硬件优化的性能提升，尤其是使用GPU的时候。
+我们最后要介绍的算法是**小批量梯度下降**(*Mini-batch Gradient Descent*)。当你知道批量梯度下降和随机梯度下降后，它就好理解多了：在每一步中，它不像批量梯度下降，在整个训练集上计算梯度，也不像随机梯度下降，只在一个实例上计算梯度，小批量梯度下降在少量随机实例集（被称为小批量）上计算梯度。小批量梯度下降胜过随机梯度下降的主要优点是，你可以得到进行矩阵运算的硬件优化的性能提升，尤其是使用 GPU 的时候。
 
-算法在参数空间上的表现比随机梯度下降要稳定，尤其是当小批量的数量很多时。所以，小批量梯度下降最终会比SGD更接近最小值。不过，另一方面，它也不容易跳出局部最小值（对于存在局部最小值的问题，不像先前见到的线性回归）。图4-11展现了三种梯度下降算法在参数空间中训练的路程。它们最终都很接近最小值，但是批量梯度下降最终停在了最小值，而随机梯度下降和小批量梯度下降都在周围浮动。不过，别忘了批量梯度下降每步都会花很长的时间，如果使用合适的学习进度，随机梯度下降和小批量梯度下降也能到达最小值。
+算法在参数空间上的表现比随机梯度下降要稳定，尤其是当小批量的数量很多时。所以，小批量梯度下降最终会比 SGD 更接近最小值。不过，另一方面，它也不容易跳出局部最小值（对于存在局部最小值的问题，不像先前见到的线性回归）。图4-11展现了三种梯度下降算法在参数空间中训练的路程。它们最终都很接近最小值，但是批量梯度下降最终停在了最小值，而随机梯度下降和小批量梯度下降都在周围浮动。不过，别忘了批量梯度下降每步都会花很长的时间，如果使用合适的学习进度，随机梯度下降和小批量梯度下降也能到达最小值。
 
 ![11](./images/chap4/4-11.png)
 
@@ -314,7 +314,7 @@ y = 0.5 * X**2 + X + 2 + np.random.randn(m, 1)
 
 ![12](./images/chap4/4-12.png)
 
-很明显，直线永远也不能合适地拟合这些数据。所以使用Scikit-Learn的`PolynomialFeatures`类来转换训练数据，在训练集中增加每个特征的平方（2次多项式）作为新特征（在本例中只有一个特征）：
+很明显，直线永远也不能合适地拟合这些数据。所以使用 Scikit-Learn 的`PolynomialFeatures`类来转换训练数据，在训练集中增加每个特征的平方（二次多项式）作为新特征（在本例中只有一个特征）：
 
 ```python
 >>> from sklearn.preprocessing import PolynomialFeatures
@@ -337,16 +337,16 @@ array([-0.75275929, 0.56664654])
 
 ![13](./images/chap4/4-13.png)
 
-还不错：模型估计$\hat y=0.56x_1^2+0.93x_1+1.78$，实际上原始函数是$y=0.5x_1^2+1.0x_1+2.0+Gaussian noise$。
+还不错：模型估计 ![](http://latex.codecogs.com/gif.latex?%5Chat%20y%3D0.56x_1%5E2&plus;0.93x_1&plus;1.78) ，实际上原始函数是 ![](http://latex.codecogs.com/gif.latex?y%3D0.5x_1%5E2&plus;1.0x_1&plus;2.0&plus;) 高斯噪音。
 
-注意，当有多个特征时，多项式回归能找到特征之间的关系（这是普通的线性回归模型做不到的）。这是因为`PolynomialFeatures`增加了给定阶数的所有特征的组合。例如，如果有两个特征$a$和$b$，3阶的`PolynomialFeatures`不仅会增加特征$a^2$，$a^3$，$b^2$和$b^3$，也有组合$ab$，$a^2b$和$ab^2$。
+注意，当有多个特征时，多项式回归能找到特征之间的关系（这是普通的线性回归模型做不到的）。这是因为`PolynomialFeatures`增加了给定阶数的所有特征的组合。例如，如果有两个特征 ![](http://latex.codecogs.com/gif.latex?a) 和 ![](http://latex.codecogs.com/gif.latex?b) ，三阶的`PolynomialFeatures`不仅会增加特征 ![](http://latex.codecogs.com/gif.latex?a^2) ， ![](http://latex.codecogs.com/gif.latex?a^3) ， ![](http://latex.codecogs.com/gif.latex?b^2) 和 ![](http://latex.codecogs.com/gif.latex?b^3) ，也有组合 ![](http://latex.codecogs.com/gif.latex?ab) ， ![](http://latex.codecogs.com/gif.latex?a^2b) 和 ![](http://latex.codecogs.com/gif.latex?ab^2) 。
 
 > **警告**
-> d阶的`PolynomialFeatures`将包含$n$个特征的数组转换为包含$\frac{(n+d)!}{d!n!}$个特征的数组，$n!$是n的阶乘（*factorial*），等于$1\times 2\times ... \times n$。当心特征数量的组合爆炸！
+> d阶的`PolynomialFeatures`将包含 ![](http://latex.codecogs.com/gif.latex?n) 个特征的数组转换为包含 ![](http://latex.codecogs.com/gif.latex?%5Cfrac%7B%28n&plus;d%29%21%7D%7Bd%21n%21%7D) 个特征的数组， ![](http://latex.codecogs.com/gif.latex?n!) 是 ![](http://latex.codecogs.com/gif.latex?n) 的阶乘（*factorial*），等于 ![](http://latex.codecogs.com/gif.latex?1%5Ctimes%202%5Ctimes%20%5Ccdots%20%5Ctimes%20n) 。当心特征数量的组合爆炸！
 
 ## 学习曲线
 
-如果你使用高阶的多项式回归，它拟合数据的效果可能会比普通的线性回归模型更好。例如，图4-14在之前的训练集上使用了300阶的多项式模型，把它和纯线性模型、二项式模型进行比较。注意300阶的多项式模型是如何扭动而尽可能接近训练实例的。
+如果你使用高阶的多项式回归，它拟合数据的效果可能会比普通的线性回归模型更好。例如，图4-14在之前的训练集上使用了300阶的多项式模型，把它和纯线性模型、二项式模型进行比较。注意 300 阶的多项式模型是如何扭动而尽可能接近训练实例的。
 
 ![14](./images/chap4/4-14.png)
 
@@ -390,7 +390,7 @@ plot_learning_curves(lin_reg, X, y)
 > **提示**
 > 如果你的模型欠拟合了训练数据，增加一些训练实例也许会有所帮助。你需要使用一个更复杂的模型，或者找到更好的特征。
 
-现在来看看10阶多项式模型在相同数据上的学习曲线（图4-16）：
+现在来看看 10 阶多项式模型在相同数据上的学习曲线（图4-16）：
 
 ```python
 from sklearn.pipeline import Pipeline
@@ -438,29 +438,29 @@ plot_learning_curves(polynomial_regression, X, y)
 
 ### 岭回归
 
-**岭回归**（*Ridge Regression*）（也被称为**吉洪诺夫正则法**（*Tikhonov regularization*））是线性回归的一种正则版本：在损失函数中加入等于$\alpha\sum_{i=1}^{n}\theta_i^2$的正则项（*regularization term*）。这样迫使学习算法不仅要拟合数据，也要保持模型权重尽可能小。注意，正则项只能在训练时加入损失函数。一旦模型已经训练好，评估模型性能时要使用未正则化的性能度量。
+**岭回归**（*Ridge Regression*）（也被称为**吉洪诺夫正则法**（*Tikhonov regularization*））是线性回归的一种正则版本：在损失函数中加入等于 ![](http://latex.codecogs.com/gif.latex?%5Calpha%5Csum_%7Bi%3D1%7D%5E%7Bn%7D%5Ctheta_i%5E2) 的正则项（*regularization term*）。这样迫使学习算法不仅要拟合数据，也要保持模型权重尽可能小。注意，正则项只能在训练时加入损失函数。一旦模型已经训练好，评估模型性能时要使用未正则化的性能度量。
 
 > **笔记**
 > 一般来说，训练时使用的损失函数和测试时使用的性能度量是不一样的。除了正则化，另一个原因是一个优秀的损失函数应该在优化时易于求导，而用于测试的性能度量应该尽可能接近最终的目标。有一个好的例子：分类器在训练时使用类似对数损失（会在稍后讨论）的损失函数，但评估时使用精确率/召回率。
 
-超参数$\alpha$控制模型的正则化程度。如果$\alpha=0$，岭回归就成了线性回归。如果$\alpha$很大，所有的权重最终都会接近0，结果就是经过数据平均值的一条水平直线。公式4-8就是岭回归的损失函数：
+超参数 ![](http://latex.codecogs.com/gif.latex?\alpha) 控制模型的正则化程度。如果 ![](http://latex.codecogs.com/gif.latex?\alpha=0) ，岭回归就成了线性回归。如果 ![](http://latex.codecogs.com/gif.latex?\alpha) 很大，所有的权重最终都会接近 0 ，结果就是经过数据平均值的一条水平直线。公式4-8就是岭回归的损失函数：
 
 ![](http://latex.codecogs.com/gif.latex?J%28%5Ctheta%29%3D%5Cmathrm%7BMSE%7D%28%5Ctheta%29&plus;%5Calpha%5Cfrac%7B1%7D%7B2%7D%5Csum_%7Bi%3D1%7D%5E%7Bn%7D%5Ctheta_i%5E2)
 
-注意，偏差项$\theta_0$并没有被正则化（累加是从$i=1$开始的，而不是$0$）。如果我们定义$\mathbf{w}$作为特征权重（$\theta_1$到$\theta_n$）的向量，那么正规项就等于$\frac{1}{2}(\parallel\mathbf{w})^2\parallel_2$，其中$\parallel\dot\parallel_2$表示权重向量的$\ell_2$范数。对于梯度下降，只要在均方差梯度向量中增加$\alpha\mathbf{w}$。
+注意，偏差项 ![](http://latex.codecogs.com/gif.latex?\theta_0) 并没有被正则化（累加是从 ![](http://latex.codecogs.com/gif.latex?i=1) 开始的，而不是 ![](http://latex.codecogs.com/gif.latex?0) ）。如果我们定义 ![](http://latex.codecogs.com/gif.latex?%5Cmathbf%7Bw%7D) 作为特征权重（ ![](http://latex.codecogs.com/gif.latex?\theta_1) 到 ![](http://latex.codecogs.com/gif.latex?\theta_n) ）的向量，那么正规项就等于 ![](http://latex.codecogs.com/gif.latex?%5Cfrac%7B1%7D%7B2%7D%28%5Cparallel%5Cmathbf%7Bw%7D%5Cparallel_2%29%5E2) ，其中 ![](http://latex.codecogs.com/gif.latex?%5Cparallel%5Ccdot%5Cparallel_2) 表示权重向量的 ![](http://latex.codecogs.com/gif.latex?\ell_2) 范数。对于梯度下降，只要在均方差梯度向量中增加 ![](http://latex.codecogs.com/gif.latex?%5Calpha%5Cmathbf%7Bw%7D) 。
 
 > **警告**
 > 使用岭回归前，对数据进行缩放（比如，使用`StandardScaler`）是很重要的，因为它对输入特征的尺度很敏感。大多数正则化模型都是如此。
 
-图4-17展示了一些在相同的线性数据上使用不同$\alpha$值的岭回归模型。左图是普通的岭回归模型，得到线性预测结果。右图中，数据首先使用`PolynomialFeatures(degree=10)`进行扩展，然后使用`StandardScaler`进行数据缩放，最后再应用岭回归模型：这就是带有岭正则的多项式回归。注意$\alpha$增大时，预测曲线会变得平坦（即，更不极端，更合理），这样减少了偏差，但增加了方差。
+图4-17展示了一些在相同的线性数据上使用不同 ![](http://latex.codecogs.com/gif.latex?\alpha) 值的岭回归模型。左图是普通的岭回归模型，得到线性预测结果。右图中，数据首先使用`PolynomialFeatures(degree=10)`进行扩展，然后使用`StandardScaler`进行数据缩放，最后再应用岭回归模型：这就是带有岭正则的多项式回归。注意 ![](http://latex.codecogs.com/gif.latex?\alpha) 增大时，预测曲线会变得平坦（即，更不极端，更合理），这样减少了偏差，但增加了方差。
 
-对于线性回归，我们可以通过计算闭式解方程或者使用梯度下降来应用岭回归。优缺点是相同的。公式4-9展示了闭式解（矩阵$\mathbf{A}$是除了左上角有个0的$n\times n$单位矩阵（*identity matrix*），那个0对应偏差项）。
+对于线性回归，我们可以通过计算闭式解方程或者使用梯度下降来应用岭回归。优缺点是相同的。公式4-9展示了闭式解（矩阵 ![](http://latex.codecogs.com/gif.latex?%5Cmathbf%7BA%7D) 是除了左上角有个 0 的 ![](http://latex.codecogs.com/gif.latex?n%5Ctimes%20n) 单位矩阵（*identity matrix*），那个 0 对应偏差项）。
 
 ![17](./images/chap4/4-17.png)
 
 ![](http://latex.codecogs.com/gif.latex?%5Chat%5Ctheta%28%5Cmathbf%7BX%7D%5Ccdot%5Cmathbf%7BX%7D&plus;%5Calpha%5Cmathbf%7BA%7D%29%5E%7B-1%7D%5Ccdot%5Cmathbf%7BX%7D%5ET%5Ccdot%20y)
 
-下面的代码是使用Scikit-Learn的闭式解（公式4-9的变形，使用了André-Louis Cholesky的矩阵分解技术）实现的岭回归：
+下面的代码是使用Scikit-Learn的闭式解（公式4-9的变形，使用了 André-Louis Cholesky 的矩阵分解技术）实现的岭回归：
 
 ```python
 >>> from sklearn.linear_model import Ridge
@@ -479,28 +479,28 @@ array([[ 1.55071465]]
 array([[ 1.13500145]])
 ```
 
-超参数`penalty`设定使用的正则项类型。指定"l2"表明你希望随机梯度下降在损失函数中加上一个正则项，数值为权重向量的$\ell_2$范数平方的一半，：这就是普通的岭回归。
+超参数`penalty`设定使用的正则项类型。指定"l2"表明你希望随机梯度下降在损失函数中加上一个正则项，数值为权重向量的 ![](http://latex.codecogs.com/gif.latex?\ell_2) 范数平方的一半，：这就是普通的岭回归。
 
 ### Lasso回归
 
-最小绝对值收敛和选择算子回归（*Least Absolute Shrinkage and Selection Operator Regression*，简称为**Lasso回归**（*Lasso Regression*））是另一种线性回归的正则版本：像岭回归一样，它在损失函数加上一个正则项，不过它使用权重向量的$\ell_1$范数，而不是权重向量的$\ell_2$范数的平方的一半（见公式4-10）。
+最小绝对值收敛和选择算子回归（*Least Absolute Shrinkage and Selection Operator Regression*，简称为**Lasso回归**（*Lasso Regression*））是另一种线性回归的正则版本：像岭回归一样，它在损失函数加上一个正则项，不过它使用权重向量的 ![](http://latex.codecogs.com/gif.latex?\ell_1) 范数，而不是权重向量的 ![](http://latex.codecogs.com/gif.latex?\ell_2) 范数的平方的一半（见公式4-10）。
 
 ![](http://latex.codecogs.com/gif.latex?J%28%5Ctheta%29%3D%5Cmathrm%7BMSE%7D%28%5Ctheta%29&plus;%5Calpha%5Csum_%7Bi%3D1%7D%5E%7Bn%7D%5Cvert%5Ctheta_i%5Cvert)
 
-图4-18和图4-17一样，但是把岭模型换成了Lasso模型，使用了一个更小的$\alpha$值。
+图4-18和图4-17一样，但是把岭模型换成了 Lasso 模型，使用了一个更小的 ![](http://latex.codecogs.com/gif.latex?\alpha) 值。
 
 ![18](./images/chap4/4-18.png)
 
-Lasso回归一个重要的特性是它趋向于完全消除最不重要特征的权重（即把它们都设为零）。例如，图4-18（$\alpha=10^{-7}$）里右图中的虚线看起来像是二次方程，几乎是线性的：所有高阶多项式特征的权重都为零。换言之，Lasso回归自动实现特征选择并输出稀疏模型（即，非零的权重很少）。
+Lasso回归一个重要的特性是它趋向于完全消除最不重要特征的权重（即把它们都设为零）。例如，图4-18（ ![](http://latex.codecogs.com/gif.latex?\alpha=10^{-7}) ）里右图中的虚线看起来像是二次方程，几乎是线性的：所有高阶多项式特征的权重都为零。换言之，Lasso 回归自动实现特征选择并输出稀疏模型（即，非零的权重很少）。
 
-看图4-19，你能知道为什么会是这样的：在左上角的图中，背景等高线（椭圆）代表未正则化的均方差损失函数（$\alpha=0$），白圈显示了批量梯度下降中损失函数的路径。前景等高线（菱形）代表$\ell_1$惩罚，三角显示了仅在惩罚下（$\alpha\rightarrow\infty$）批量梯度下降的路径。注意第一次路线是如何到达$\theta_1=0$的，然后往下滚动直到$\theta_2=0$。在右上角的图中，等高线代表加上了$\ell_1$惩罚（$\alpha=0.5$）后同样的损失函数。全局最小值在$\theta_2=0$轴上。批量梯度下降先到达$\theta_2=0$，然后往下滚动直到到达全局最小值。两个底部图和上面的一样，不过使用了$\ell_2$惩罚。正则化后的最小值比未正则化的更接近零，不过权重并未完全消除。
+看图4-19，你能知道为什么会是这样的：在左上角的图中，背景等高线（椭圆）代表未正则化的均方差损失函数（![](http://latex.codecogs.com/gif.latex?\alpha=0) ），白圈显示了批量梯度下降中损失函数的路径。前景等高线（菱形）代表 ![](http://latex.codecogs.com/gif.latex?\ell_1) 惩罚，三角显示了仅在惩罚下（ ![](http://latex.codecogs.com/gif.latex?%5Calpha%5Crightarrow%5Cinfty) ）批量梯度下降的路径。注意第一次路线是如何到达 ![](http://latex.codecogs.com/gif.latex?\theta_1=0) 的，然后往下滚动直到 ![](http://latex.codecogs.com/gif.latex?\theta_2=0) 。在右上角的图中，等高线代表加上了 ![](http://latex.codecogs.com/gif.latex?\ell_1) 惩罚（ ![](http://latex.codecogs.com/gif.latex?\alpha=0.5) ）后同样的损失函数。全局最小值在 ![](http://latex.codecogs.com/gif.latex?\theta_2=0) 轴上。批量梯度下降先到达 ![](http://latex.codecogs.com/gif.latex?\theta_2=0) ，然后往下滚动直到到达全局最小值。两个底部图和上面的一样，不过使用了 ![](http://latex.codecogs.com/gif.latex?\ell_2) 惩罚。正则化后的最小值比未正则化的更接近零，不过权重并未完全消除。
 
 ![19](./images/chap4/4-19.png)
 
 > **提示**
-> 在Lasso回归损失函数中，批量梯度下降的路径先下降到低谷后提高，直到终点。这是因为在$\theta_2=0$时，斜率发生了突变。为了真正收敛到全局最小值，你需要慢慢降低学习率。
+> 在Lasso回归损失函数中，批量梯度下降的路径先下降到低谷后提高，直到终点。这是因为在 ![](http://latex.codecogs.com/gif.latex?\theta_2=0) 时，斜率发生了突变。为了真正收敛到全局最小值，你需要慢慢降低学习率。
 
-Lasso损失函数在$\theta_i=0(i=1,,2,...,n)$处不可微分，但是如果你使用子梯度向量（*subgradient vector*）$\mathbf{g}$，梯度下降就能正常运作。公式4-11展示了用于梯度下降中Lasso损失函数的子梯度向量等式。
+Lasso损失函数在 ![](http://latex.codecogs.com/gif.latex?%5Ctheta_i%3D0%28i%3D1%2C2%2C%5Ccdots%2Cn%29) 处不可微分，但是如果你使用子梯度向量（*subgradient vector*） ![](http://latex.codecogs.com/gif.latex?%5Cmathbf%7Bg%7D) ，梯度下降就能正常运作。公式4-11展示了用于梯度下降中 Lasso 损失函数的子梯度向量等式。
 
 ![](http://latex.codecogs.com/gif.latex?g%28%5Ctheta%2CJ%29%3D%5Cnabla_%7B%5Ctheta%7D%5Cmathrm%7BMSE%7D%28%5Ctheta%29&plus;%5Calpha%5Cbegin%7Bpmatrix%7D%20%5Cmathrm%7Bsign%7D%28%5Ctheta_1%29%5C%5C%20%5Cmathrm%7Bsign%7D%28%5Ctheta_2%29%5C%5C%20%5Cvdots%5C%5C%20%5Cmathrm%7Bsign%7D%28%5Ctheta_n%29%20%5Cend%7Bpmatrix%7D%5C%20%5Cmathrm%7Bwhere%7D%5C%20%5Cmathrm%7Bsign%7D%28%5Ctheta_i%29%3D%5Cbegin%7Bcases%7D%20-1%20%26%20%5Ctheta_i%3C0%5C%5C%200%20%26%20%5Ctheta_i%3D0%5C%5C%20&plus;1%20%26%20%5Ctheta_i%3E0%20%5Cend%7Bcases%7D)
 
@@ -516,13 +516,13 @@ array([ 1.53788174]
 
 ### 弹性网络
 
-弹性网络介于岭回归和Lasso回归之间。它的正则项是岭回归和Lasso回归正则项的简单混合，你可以控制混合率$r$。当$r=0$时，弹性网络和岭回归相同，当$r=1$时，弹性网络和Lasso回归相同（见公式4-12）。
+弹性网络介于岭回归和Lasso回归之间。它的正则项是岭回归和Lasso回归正则项的简单混合，你可以控制混合率 ![](http://latex.codecogs.com/gif.latex?r) 。当 ![](http://latex.codecogs.com/gif.latex?r=0) 时，弹性网络和岭回归相同，当 ![](http://latex.codecogs.com/gif.latex?r=1)  时，弹性网络和Lasso回归相同（见公式4-12）。
 
 ![](http://latex.codecogs.com/gif.latex?J%28%5Ctheta%29%3D%5Cmathrm%7BMSE%7D%28%5Ctheta%29&plus;r%5Calpha%5Csum_%7Bi%3D1%7D%5En%5Cvert%5Ctheta_i%5Cvert&plus;%5Cfrac%7B1-r%7D%7B2%7D%5Calpha%5Csum_%7Bi%3D1%7D%5En%5Ctheta_i%5E2)
 
 所以，什么时候用普通的线性回归（即，没有任何正则化），什么时候用岭回归、Lasso或者弹性网络呢？一般来说，有一点正则会更好，所以通常应该避免使用普通的线性回归。岭回归是个不错的默认选项，不过如果你怀疑只有少数特征有用，你可以选择Lasso回归或弹性网络，因为它们会将无用特征的权重降低为零。通常来讲，弹性网络要优于Lasso，因为当特征数量大于训练实例数量时，或是特征之间关联很强时，Lasso会表现得不规律。
 
-下面是一个使用了Scikit-Learn的`ElasticNet`（`l1_ratio`和混合率$r$有关）的简短例子：
+下面是一个使用了 Scikit-Learn 的`ElasticNet`（`l1_ratio`和混合率 ![](http://latex.codecogs.com/gif.latex?r) 有关）的简短例子：
 
 ```python
 >>> from sklearn.linear_model import ElasticNet
@@ -534,7 +534,7 @@ array([ 1.54333232])
 
 ### 早期停止法
 
-一种与众不同的调整迭代学习算法（比如梯度下降）的方法是当验证误差到达最小值时尽快停止训练。这被称为**早期停止法**（*early stopping*）。图4-20展示了一个正在使用批量梯度下降训练的复杂模型（本例中是一个高阶多项式回归模型）。当纪元增加，算法开始学习，训练集上的预测误差（RMSE）自然地下降，验证集上的预测误差也一样。不过，一段时间后验证误差不再下降，反而开始回升。这表明模型开始过拟合数据了。有了早期停止法，你能在验证误差到达最小值时尽快停止训练。它是如此简单而高效的正则技术，以至于Geoffrey Hinton将它称为“美丽的免费午餐”。
+一种与众不同的调整迭代学习算法（比如梯度下降）的方法是当验证误差到达最小值时尽快停止训练。这被称为**早期停止法**（*early stopping*）。图4-20展示了一个正在使用批量梯度下降训练的复杂模型（本例中是一个高阶多项式回归模型）。当纪元增加，算法开始学习，训练集上的预测误差（RMSE）自然地下降，验证集上的预测误差也一样。不过，一段时间后验证误差不再下降，反而开始回升。这表明模型开始过拟合数据了。有了早期停止法，你能在验证误差到达最小值时尽快停止训练。它是如此简单而高效的正则技术，以至于 Geoffrey Hinton 将它称为“美丽的免费午餐”。
 
 ![20](./images/chap4/4-20.png)
 
@@ -564,7 +564,7 @@ for epoch in range(1000):
 
 ## 逻辑回归
 
-我们在第一章中讨论过，有些回归算法也能用于分类（反之亦然）。**逻辑回归**（*Logistic Regression*，也称为*Logit	Regression*）用于清除实例属于某一特定类的概率（比如，邮件属于垃圾邮件的概率）。如果估计的概率大于50%，模型预测实例属于这个类（称为正类，标记为“1”），否则预测它不属于这个类（即，它属于负类，标记为“0”）。这样它就是一个二分类器了。
+我们在第一章中讨论过，有些回归算法也能用于分类（反之亦然）。**逻辑回归**（*Logistic Regression*，也称为*Logit	Regression*）用于清除实例属于某一特定类的概率（比如，邮件属于垃圾邮件的概率）。如果估计的概率大于 50% ，模型预测实例属于这个类（称为正类，标记为“1”），否则预测它不属于这个类（即，它属于负类，标记为“0”）。这样它就是一个二分类器了。
 
 ### 概率估计
 
@@ -572,13 +572,13 @@ for epoch in range(1000):
 
 ![](http://latex.codecogs.com/gif.latex?%5Chat%20p%3Dh_%7B%5Ctheta%7D%28%5Cmathbf%7Bx%7D%29%3D%5Csigma%28%5Ctheta%5ET%20%5Ccdot%20%5Cmathbf%7Bx%7D%29)
 
-逻辑函数——也称为*logit*，记为$\sigma(\cdot)$——是**sigmoid函数**（*sigmoid function*，即S形函数），输出介于0和1之间的数。它的定义见公式4-14和图4-21。
+逻辑函数——也称为*logit*，记为 ![](http://latex.codecogs.com/gif.latex?%5Csigma%28%5Ccdot%29) ——是**sigmoid函数**（*sigmoid function*，即 S 形函数），输出介于 0 和 1 之间的数。它的定义见公式4-14和图4-21。
 
 ![](http://latex.codecogs.com/gif.latex?%5Csigma%28t%29%3D%5Cfrac%7B1%7D%7B1&plus;%5Cexp%28-t%29%7D)
 
 ![21](./images/chap4/4-21.png)
 
-一旦逻辑回归模型估计出实例$\mathbf{x}$属于正类的概率$\hat p=h_{\theta}(\mathbf{x})$，它就能轻松得到预测$\hat y$（见公式4-15）。
+一旦逻辑回归模型估计出实例 ![](http://latex.codecogs.com/gif.latex?%5Cmathbf%7Bx%7D) 属于正类的概率 ![](http://latex.codecogs.com/gif.latex?%5Chat%20p%3Dh_%7B%5Ctheta%7D%28%5Cmathbf%7Bx%7D%29) ，它就能轻松得到预测 ![](http://latex.codecogs.com/gif.latex?%5Chat%20y) （见公式4-15）。
 
 ![](http://latex.codecogs.com/gif.latex?%5Chat%20y%3D%5Cbegin%7Bcases%7D%200%20%26%20%5Cmathrm%7Bif%7D%5C%20%5Chat%20p%3C0.5%2C%5C%5C%201%20%26%20%5Cmathrm%7Bif%7D%5C%20%5Chat%20p%5Cgeq%200.5.%20%5Cend%7Bcases%7D)
 
