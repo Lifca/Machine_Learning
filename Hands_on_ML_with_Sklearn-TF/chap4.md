@@ -18,22 +18,22 @@
 
 ## 线性回归
 
-在第一章中，我们介绍了一个简单的生活满意度回归模型：$life\_satisfaction=\theta_0+\theta_1\times GDP\_per\_capita$。
+在第一章中，我们介绍了一个简单的生活满意度回归模型：![](http://latex.codecogs.com/gif.latex?%5Cmathrm%7Blife%5C_satisfaction%7D%3D%5Ctheta_0&plus;%5Ctheta_1%5Ctimes%20%5Cmathrm%7BGDP%5C_%20per%5C_capita%7D)。
 
 这个模型只是输入特征`GDP_per_capita`的线性函数。$\theta_0$和$\theta_1$是模型的参数。
 
 更普遍的，线性模型通过计算输入特征的权重总和，并加上一个常数**偏置项**（*bias term*）（也称为**截距项**（*intercept term*））来做出预测，如公式4-1：
 
-$$\hat{y}=\theta_0+\theta_1x_1+\theta_2x_2+...+\theta_nx_n$$
+![](http://latex.codecogs.com/gif.latex?%5Chat%7By%7D%3D%5Ctheta_0&plus;%5Ctheta_1x_1&plus;%5Ctheta_2x_2&plus;%5Ccdots&plus;%5Ctheta_nx_n)
 
-- $\hat{y}$是预测值。
-- $n$是特征总数。
-- $x_i$是第i个特征值。
+- ![](http://latex.codecogs.com/gif.latex?%5Chat%7By%7D) 是预测值。
+- ![](http://latex.codecogs.com/gif.latex?n) 是特征总数。
+- ![](http://latex.codecogs.com/gif.latex?x_i) 是第i个特征值。
 - $\theta_j$是第j个模型参数（包括偏置项$\theta_0$和特征权重$\theta_0,\theta_1,\theta_2,...,\theta_n$）
 
 可以写成更简短的向量形式，如公式4-2：
 
-$\hat{y}=h_{\theta}(\mathbf{x})=\theta^T·\mathbf{x}$
+![](http://latex.codecogs.com/gif.latex?%5Chat%7By%7D%3Dh_%7B%5Ctheta%7D%28%5Cmathbf%7Bx%7D%29%3D%5Ctheta%5ET%B7%5Cmathbf%7Bx%7D)
 
 - $\theta$是模型的参数向量，包括偏置项$\theta_0$和特征权重$\theta_1$到$\theta_n$
 - $\theta^T$是$\theta$的转置（行向量变为列向量）
@@ -45,7 +45,7 @@ $\hat{y}=h_{\theta}(\mathbf{x})=\theta^T·\mathbf{x}$
 
 在训练集$\mathbf{X}$上，线性模型的假设值$h_{\theta}$的 MSE 用公式4-3来计算：
 
-$$MSE(\mathbf{X},h_{\theta})=\frac{1}{m}\sum^m_{i=1}(\theta^T·\mathbf{x}^{(i)}-y^{(i)})^2$$
+![](http://latex.codecogs.com/gif.latex?%5Cmathrm%7BMSE%7D%28%5Cmathbf%7BX%7D%2Ch_%7B%5Ctheta%7D%29%3D%5Cfrac%7B1%7D%7Bm%7D%5Csum%5Em_%7Bi%3D1%7D%28%5Ctheta%5ET%B7%5Cmathbf%7Bx%7D%5E%7B%28i%29%7D-y%5E%7B%28i%29%7D%29%5E2)
 
 大多数公式都在第二章中（见“公式”）。主要的不同是我们把$h$写成$h_{\theta}$，以便能清楚表明模型是由向量$\theta$参数化的。为了简化公式，我们用$MES(\theta)$代替$MSE(\mathbf{X},h_{\theta})$。
 
@@ -53,7 +53,7 @@ $$MSE(\mathbf{X},h_{\theta})=\frac{1}{m}\sum^m_{i=1}(\theta^T·\mathbf{x}^{(i)}-
 
 为了找到能最小化损失函数的$\theta$值，可以使用**闭式解**（*closed-form solution*）——换言之，通过数学公式直接得到解。这被称为**正规方程**（*Normal Equation*）（公式4-4）：
 
-$$\hat{\theta}=(\mathbf{X}^T·\mathbf{X})^{-1}·\mathbf{X}^T·y$$
+![](http://latex.codecogs.com/gif.latex?%5Chat%7B%5Ctheta%7D%3D%28%5Cmathbf%7BX%7D%5ET%B7%5Cmathbf%7BX%7D%29%5E%7B-1%7D%B7%5Cmathbf%7BX%7D%5ET%B7y)
 
 - $\hat{\theta}$是最小化损失函数的$\theta$值
 - $y$是目标值的向量，包含$y^{(1)}$到y^{(m)}
@@ -175,18 +175,18 @@ array([[4.21509616],
 
 为了实现梯度下降，你需要计算每一个$\theta_j$下损失函数的梯度。换言之，你需要计算当$\theta_j$变化了一点点时，梯度会改变多少。这被称为**偏导数**（*partial derivative*）。这就像是你面向东方时询问“我脚下的斜率是多少？”，然后面向北方时问相同的问题一样（如果你能想象出一个超过三维的宇宙，所有方向以此类推）。公式4-5计算了损失函数对于参数$\theta_j$的偏导数，记为$\frac{\partial}{\partial{\theta_j}}MSE(\theta)$。
 
-$$\frac{\partial}{\partial{\theta_j}}MSE(\theta)=\frac{2}{m}\sum_{i=1}^{m}(\theta^T\dot x^{(i)}-y^{(i)})x_j^{(i)}$$
+![](http://latex.codecogs.com/gif.latex?%5Cfrac%7B%5Cpartial%7D%7B%5Cpartial%7B%5Ctheta_j%7D%7D%5Cmathrm%7BMSE%7D%28%5Ctheta%29%3D%5Cfrac%7B2%7D%7Bm%7D%5Csum_%7Bi%3D1%7D%5E%7Bm%7D%28%5Ctheta%5ET%5Ccdot%20%5Cmathbf%7Bx%7D%5E%7B%28i%29%7D-y%5E%7B%28i%29%7D%29x_j%5E%7B%28i%29%7D)
 
 你可以使用公式4-6一次性计算所有偏导数，不用单独一个个计算。梯度向量记为$\nabla_{\theta}MSE(\theta)$，包括了损失函数所有的偏导数（每个模型参数一个）。
 
-$\nabla_{\theta}MSE=$
+![](http://latex.codecogs.com/gif.latex?%5Cnabla_%7B%5Ctheta%7D%5Cmathrm%7BMSE%7D%28%5Ctheta%29%3D%5Cbegin%7Bpmatrix%7D%20%5Cfrac%7B%5Cpartial%20%7D%7B%5Cpartial%20%5Ctheta_0%7D%5Cmathrm%7BMSE%7D%28%5Ctheta%29%5C%5C%20%5Cfrac%7B%5Cpartial%20%7D%7B%5Cpartial%20%5Ctheta_1%7D%5Cmathrm%7BMSE%7D%28%5Ctheta%29%5C%5C%20%5Cvdots%20%5C%5C%20%5Cfrac%7B%5Cpartial%20%7D%7B%5Cpartial%20%5Ctheta_n%7D%5Cmathrm%7BMSE%7D%28%5Ctheta%29%20%5Cend%7Bpmatrix%7D%3D%5Cfrac%7B2%7D%7Bm%7D%5Cmathbf%7BX%7D%5ET%5Ccdot%28%5Cmathbf%7BX%7D%5Ccdot%20%5Ctheta-%5Cmathbf%7By%7D%29)
 
 > **警告**
 > 注意，这个方程在每一步梯度下降计算时都使用了整个训练集X！这也就是算法被称为**批量梯度下降**（*Batch Gradient Descent*）的原因：每一步都使用全部训练集。所以它在大数据集上运行得很慢（不过我们马上就会介绍更快的梯度下降算法）。然而，梯度下降的运算规模和特征数量成正比。当有成百上千的特征时，使用梯度下降训练线性回归模型要比正规方程快很多。
 
 一旦你得到梯度向量，如果它是上坡的，那就沿相反方向下坡。这就意味着从$\theta$减去$\nabla_{\theta}MSE(\theta)$。这就是学习率$\eta$发挥作用的地方：梯度向量和$\eta$的乘积决定了下坡时的步长（公式4-7）。
 
-$$\theta^{next step}=\theta-\eta\nabla_{\theta}MSE(\theta)$$
+![](http://latex.codecogs.com/gif.latex?%5Ctheta%5E%7B%5Cmathrm%7Bnext%5C%20step%7D%7D%3D%5Ctheta-%5Ceta%5Cnabla_%7B%5Ctheta%7D%5Cmathrm%7BMSE%7D%28%5Ctheta%29)
 
 来看看算法的一种快速实现方法：
 
@@ -445,7 +445,7 @@ plot_learning_curves(polynomial_regression, X, y)
 
 超参数$\alpha$控制模型的正则化程度。如果$\alpha=0$，岭回归就成了线性回归。如果$\alpha$很大，所有的权重最终都会接近0，结果就是经过数据平均值的一条水平直线。公式4-8就是岭回归的损失函数：
 
-$$J(\theta)=MSE(\theta)+\alpha\frac{1}{2}\sum_{i=1}^{n}\theta_i^2$$
+![](http://latex.codecogs.com/gif.latex?J%28%5Ctheta%29%3D%5Cmathrm%7BMSE%7D%28%5Ctheta%29&plus;%5Calpha%5Cfrac%7B1%7D%7B2%7D%5Csum_%7Bi%3D1%7D%5E%7Bn%7D%5Ctheta_i%5E2)
 
 注意，偏差项$\theta_0$并没有被正则化（累加是从$i=1$开始的，而不是$0$）。如果我们定义$\mathbf{w}$作为特征权重（$\theta_1$到$\theta_n$）的向量，那么正规项就等于$\frac{1}{2}(\parallel\mathbf{w})^2\parallel_2$，其中$\parallel\dot\parallel_2$表示权重向量的$\ell_2$范数。对于梯度下降，只要在均方差梯度向量中增加$\alpha\mathbf{w}$。
 
@@ -458,7 +458,7 @@ $$J(\theta)=MSE(\theta)+\alpha\frac{1}{2}\sum_{i=1}^{n}\theta_i^2$$
 
 ![17](./images/chap4/4-17.png)
 
-$$\hat\theta(\mathbf{X}\cdot\mathbf{X}+\alpha\mathbf{A})^{-1}\cdot\mathbf{X}^T\dot y$$
+![](http://latex.codecogs.com/gif.latex?%5Chat%5Ctheta%28%5Cmathbf%7BX%7D%5Ccdot%5Cmathbf%7BX%7D&plus;%5Calpha%5Cmathbf%7BA%7D%29%5E%7B-1%7D%5Ccdot%5Cmathbf%7BX%7D%5ET%5Ccdot%20y)
 
 下面的代码是使用Scikit-Learn的闭式解（公式4-9的变形，使用了André-Louis Cholesky的矩阵分解技术）实现的岭回归：
 
@@ -485,7 +485,7 @@ array([[ 1.13500145]])
 
 最小绝对值收敛和选择算子回归（*Least Absolute Shrinkage and Selection Operator Regression*，简称为**Lasso回归**（*Lasso Regression*））是另一种线性回归的正则版本：像岭回归一样，它在损失函数加上一个正则项，不过它使用权重向量的$\ell_1$范数，而不是权重向量的$\ell_2$范数的平方的一半（见公式4-10）。
 
-$$J(\theta)=MSE(\theta)+\alpha\sum_{i=1}^{n}\vert\theta_i\vert$$
+![](http://latex.codecogs.com/gif.latex?J%28%5Ctheta%29%3D%5Cmathrm%7BMSE%7D%28%5Ctheta%29&plus;%5Calpha%5Csum_%7Bi%3D1%7D%5E%7Bn%7D%5Cvert%5Ctheta_i%5Cvert)
 
 图4-18和图4-17一样，但是把岭模型换成了Lasso模型，使用了一个更小的$\alpha$值。
 
@@ -502,7 +502,7 @@ Lasso回归一个重要的特性是它趋向于完全消除最不重要特征的
 
 Lasso损失函数在$\theta_i=0(i=1,,2,...,n)$处不可微分，但是如果你使用子梯度向量（*subgradient vector*）$\mathbf{g}$，梯度下降就能正常运作。公式4-11展示了用于梯度下降中Lasso损失函数的子梯度向量等式。
 
-$$$$
+![](http://latex.codecogs.com/gif.latex?g%28%5Ctheta%2CJ%29%3D%5Cnabla_%7B%5Ctheta%7D%5Cmathrm%7BMSE%7D%28%5Ctheta%29&plus;%5Calpha%5Cbegin%7Bpmatrix%7D%20%5Cmathrm%7Bsign%7D%28%5Ctheta_1%29%5C%5C%20%5Cmathrm%7Bsign%7D%28%5Ctheta_2%29%5C%5C%20%5Cvdots%5C%5C%20%5Cmathrm%7Bsign%7D%28%5Ctheta_n%29%20%5Cend%7Bpmatrix%7D%5C%20%5Cmathrm%7Bwhere%7D%5C%20%5Cmathrm%7Bsign%7D%28%5Ctheta_i%29%3D%5Cbegin%7Bcases%7D%20-1%20%26%20%5Ctheta_i%3C0%5C%5C%200%20%26%20%5Ctheta_i%3D0%5C%5C%20&plus;1%20%26%20%5Ctheta_i%3E0%20%5Cend%7Bcases%7D)
 
 下面是一个使用了Scikit-Learn中`Lasso`类的小例子。你也可以用`SGDRegressor(penalty="l1")`代替。
 
@@ -518,7 +518,7 @@ array([ 1.53788174]
 
 弹性网络介于岭回归和Lasso回归之间。它的正则项是岭回归和Lasso回归正则项的简单混合，你可以控制混合率$r$。当$r=0$时，弹性网络和岭回归相同，当$r=1$时，弹性网络和Lasso回归相同（见公式4-12）。
 
-$$J(\theta)=MSE(\theta)+r\alpha\sum_{i=1}^n\vert\theta_i\vert+\frac{1-r}{2}\alpha\sum_{i=1}^n\theta_i^2$$
+![](http://latex.codecogs.com/gif.latex?J%28%5Ctheta%29%3D%5Cmathrm%7BMSE%7D%28%5Ctheta%29&plus;r%5Calpha%5Csum_%7Bi%3D1%7D%5En%5Cvert%5Ctheta_i%5Cvert&plus;%5Cfrac%7B1-r%7D%7B2%7D%5Calpha%5Csum_%7Bi%3D1%7D%5En%5Ctheta_i%5E2)
 
 所以，什么时候用普通的线性回归（即，没有任何正则化），什么时候用岭回归、Lasso或者弹性网络呢？一般来说，有一点正则会更好，所以通常应该避免使用普通的线性回归。岭回归是个不错的默认选项，不过如果你怀疑只有少数特征有用，你可以选择Lasso回归或弹性网络，因为它们会将无用特征的权重降低为零。通常来讲，弹性网络要优于Lasso，因为当特征数量大于训练实例数量时，或是特征之间关联很强时，Lasso会表现得不规律。
 
@@ -570,21 +570,17 @@ for epoch in range(1000):
 
 所以它是怎么运作的？就像线性回归模型一样，逻辑回归模型计算输入特征的权重总和（加上偏差项），不过不像线性回归模型那样直接输出结果，它输出结果的逻辑函数值（*logistic*）（见公式4-13）。
 
-$$\hat p=h_{\theta}(\mathbf{x})=\sigma(\theta^T \cdot \mathbf{x})$$
+![](http://latex.codecogs.com/gif.latex?%5Chat%20p%3Dh_%7B%5Ctheta%7D%28%5Cmathbf%7Bx%7D%29%3D%5Csigma%28%5Ctheta%5ET%20%5Ccdot%20%5Cmathbf%7Bx%7D%29)
 
 逻辑函数——也称为*logit*，记为$\sigma(\cdot)$——是**sigmoid函数**（*sigmoid function*，即S形函数），输出介于0和1之间的数。它的定义见公式4-14和图4-21。
 
-$$\sigma(t)=\frac{1}{1+\exp(-t)}$$
+![](http://latex.codecogs.com/gif.latex?%5Csigma%28t%29%3D%5Cfrac%7B1%7D%7B1&plus;%5Cexp%28-t%29%7D)
 
 ![21](./images/chap4/4-21.png)
 
 一旦逻辑回归模型估计出实例$\mathbf{x}$属于正类的概率$\hat p=h_{\theta}(\mathbf{x})$，它就能轻松得到预测$\hat y$（见公式4-15）。
 
-$$\hat y=\begin{cases}
-0 & \mathrm{if}\  \hat p<0.5,\\ 
-1 & \mathrm{if}\  \hat p\geq 0.5.
-\end{cases}
-$$
+![](http://latex.codecogs.com/gif.latex?%5Chat%20y%3D%5Cbegin%7Bcases%7D%200%20%26%20%5Cmathrm%7Bif%7D%5C%20%5Chat%20p%3C0.5%2C%5C%5C%201%20%26%20%5Cmathrm%7Bif%7D%5C%20%5Chat%20p%5Cgeq%200.5.%20%5Cend%7Bcases%7D)
 
 注意，当$t<0$时$\sigma(t)<0.5$，当$t\geq0$时$\sigma(t)\geq0.5$，所以如果$\theta^T\cdot \mathbf{x}$为正类，逻辑回归模型预测为1，如果是负类则预测为0。
 
@@ -592,22 +588,17 @@ $$
 
 很好，现在你知道逻辑回归是如何进行概率估计和预测的了。不过，它是如何进行训练的？训练的目标是设置参数向量$\theta$，使模型估计正例（$y=1$）的概率高，估计负例（$y=0$）的概率低。等式4-16的单个样例$\mathbf{x}$的损失函数体现了这种思路。
 
-$$
-c(\theta)=\begin{cases}
--\log(\hat p) & \mathrm{if}\ y=1, \\
--\log(1-\hat p) & \mathrm{if}\  y=0.
-\end{cases}
-$$
+![](http://latex.codecogs.com/gif.latex?c%28%5Ctheta%29%3D%5Cbegin%7Bcases%7D%20-%5Clog%28%5Chat%20p%29%20%26%20%5Cmathrm%7Bif%7D%5C%20y%3D1%2C%20%5C%5C%20-%5Clog%281-%5Chat%20p%29%20%26%20%5Cmathrm%7Bif%7D%5C%20y%3D0.%20%5Cend%7Bcases%7D)
 
 这个损失函数是合理的，因为当$t$接近零时，$-\log(t)$变得很大，所以如果模型估计正例的概率接近0，损失会很大，如果估计反例的概率接近1，损失也很大。另一方面，当$t$接近1时，$-log(t)$接近0，所以如果模型估计一个负例的概率接近0，或估计一个正例的概率接近1，那么损失函数也接近0，那么损失接近0，这正是我们想要的。
 
 整个训练集上的损失函数就是在所有训练实例上的平均损失。它可以写成一个表达式（你能很容易证明），称为**对数损失**（*log loss*），如公式4-17所示。
 
-$$J(\theta)=-\frac{1}{m}\sum_{i=1}^m[y^{(i)}\log{(\hat p^{(i)})}+(1-y^{(i)})\log(1-\hat p^{(i)})]$$
+![](http://latex.codecogs.com/gif.latex?J%28%5Ctheta%29%3D-%5Cfrac%7B1%7D%7Bm%7D%5Csum_%7Bi%3D1%7D%5Em%5By%5E%7B%28i%29%7D%5Clog%7B%28%5Chat%20p%5E%7B%28i%29%7D%29%7D&plus;%281-y%5E%7B%28i%29%7D%29%5Clog%281-%5Chat%20p%5E%7B%28i%29%7D%29%5D)
 
 坏消息是没有已知的闭式方程可以计算最小化损失函数的$\theta$值，不过好消息是损失函数是凸函数，所以梯度下降（或者其他优化算法）可以找到全局最小值（如果学习率不是很大，并且有充足的等待时间）。公式4-18给出了损失函数关于第$j$个模型参数$\theta_j$的偏导数。
 
-$$\frac{\partial }{\partial \theta_j}J(\theta)=\frac{1}{m}\sum_{i=1}^m(\sigma(\theta^T\cdot\mathbf{x}^{(i)})-y^{(i)})x_j^{(i)}$$
+![](http://latex.codecogs.com/gif.latex?%5Cfrac%7B%5Cpartial%20%7D%7B%5Cpartial%20%5Ctheta_j%7DJ%28%5Ctheta%29%3D%5Cfrac%7B1%7D%7Bm%7D%5Csum_%7Bi%3D1%7D%5Em%28%5Csigma%28%5Ctheta%5ET%5Ccdot%5Cmathbf%7Bx%7D%5E%7B%28i%29%7D%29-y%5E%7B%28i%29%7D%29x_j%5E%7B%28i%29%7D)
 
 这个公式看起来很像公式4-5：它计算每个实例的预测误差，再乘上第$j$个特征值，然后计算所有训练实例的平均值。一旦你得到了包含所有偏导数的梯度向量，就可以在批量梯度下降算法中使用了。你现在知道如何训练一个逻辑回归模型了。对于随机梯度下降，你一次只用一个实例，对于小批量梯度下降，你一次用一个小批量。
 
@@ -670,13 +661,13 @@ array([1, 0])
 
 思路很简单：对于给定的实例$\mathbf{x}$，Softmax 回归模型首先计算$k$类的分数$s_k(\mathbf{x})$，然后通过应用 softmax 函数（通常也称为归一化指数（*normalized exponential*））来估计每个类的概率。计算$s_k(\mathbf{x})$的等式看起来应该很眼熟，因为它看起来就像线性回归的预测（见公式4-19）。
 
-$$s_k(\mathbf{x})=(\theta^{(k)})^T\cdot \mathbf{x}$$
+![](http://latex.codecogs.com/gif.latex?s_k%28%5Cmathbf%7Bx%7D%29%3D%28%5Ctheta%5E%7B%28k%29%7D%29%5ET%5Ccdot%20%5Cmathbf%7Bx%7D)
 
 每个类都有自己的专用参数向量$\theta^{(k)}$。所有的向量都都以行的形式储存在参数矩阵$\Theta$中。
 
 一旦你算出了每个类中每个实例$\mathbf{x}$的的分数，你就可以通过 softmax 函数（公式4-20）估计实例属于类别$k$的概率\hat p_k$$：它计算每个分数的指数，然后把它们归一化（除以所有指数的总和）。
 
-$$\hat p_k=\sigma(\mathbf{s}(\mathbf{x}))_k=\frac{\exp{s_k(\mathbf{x})}}{\sum_{i=1}^K \exp(s_j(\mathbf{x}))}$$
+![](http://latex.codecogs.com/gif.latex?%5Chat%20p_k%3D%5Csigma%28%5Cmathbf%7Bs%7D%28%5Cmathbf%7Bx%7D%29%29_k%3D%5Cfrac%7B%5Cexp%7Bs_k%28%5Cmathbf%7Bx%7D%29%7D%7D%7B%5Csum_%7Bi%3D1%7D%5EK%20%5Cexp%28s_j%28%5Cmathbf%7Bx%7D%29%29%7D)
 
 - $K$ 是类别的总数。
 - $\mathbf{s}(\mathbf{x})$ 是包含了每个类中的每个实例 $\mathbf{x}$ 的分数的向量。
@@ -684,16 +675,16 @@ $$\hat p_k=\sigma(\mathbf{s}(\mathbf{x}))_k=\frac{\exp{s_k(\mathbf{x})}}{\sum_{i
 
 就像逻辑回归分类器一样，Softmax 回归分类器也使用最高估计概率预测类别（就是分数最高的类别），像公式4-21中展示的那样。
 
-<img src="http://latex.codecogs.com/gif.latex?\hat y=\arg \max \sigma(\mathbf{s(\mathbf(x))})_k=\arg \max s_k(\mathbf{x})=\arg \max((\theta^{(k)})^T\cdot \mathbf{x})">
+![](http://latex.codecogs.com/gif.latex?%5Chat%20y%3D%5Carg%20%5Cmax%20%5Csigma%28%5Cmathbf%7Bs%28%5Cmathbf%28x%29%29%7D%29_k%3D%5Carg%20%5Cmax%20s_k%28%5Cmathbf%7Bx%7D%29%3D%5Carg%20%5Cmax%28%28%5Ctheta%5E%7B%28k%29%7D%29%5ET%5Ccdot%20%5Cmathbf%7Bx%7D%29)
 
-- *argmax*运算符返回能最大化函数的变量值。在上面的公式中，它返回能最大化估计概率 <img src="http://latex.codecogs.com/gif.latex?\sigma(\mathbf{s(\mathbf(x))})_k"> 的 $k$ 值。
+- *argmax*运算符返回能最大化函数的变量值。在上面的公式中，它返回能最大化估计概率 ![](http://latex.codecogs.com/gif.latex?%5Csigma%28%5Cmathbf%7Bs%28%5Cmathbf%28x%29%29%7D%29_k) 的 $k$ 值。
 
 > **提示**
 > Softmax 回归分类器一次只预测一类（即，它是多分类的，但不是多输出的），所以它只用于判断互斥的类别，像不同种类的植物。你不能用它来识别同一张照片中的多个人。
 
 既然你已经知道模型是如何进行概率估计和预测的了，就让我们来看看训练过程吧。目标是能建立一个在目标类上拥有高概率（因此其他类别的概率很低）的模型。最小化公式4-22中的损失函数，称为**交叉熵**（*cross entropy*），因为当它对目标类的估计概率很低时，它会惩罚模型。交叉熵频繁用于测量待测类与目标类的匹配程度（在后面几章中，我们会多次使用到）。
 
-$$J(\Theta)=-\frac{1}{m}\sum_{i=1}^m\sum_k=1^Ky_k^{(i)}\log (\hat p_k^{(i)})$$
+![](http://latex.codecogs.com/gif.latex?J%28%5CTheta%29%3D-%5Cfrac%7B1%7D%7Bm%7D%5Csum_%7Bi%3D1%7D%5Em%5Csum_k%3D1%5EKy_k%5E%7B%28i%29%7D%5Clog%20%28%5Chat%20p_k%5E%7B%28i%29%7D%29)
 
 - 如果第$i$个实例的目标类是$k$，$y_k^{(i)}=1$，否则$y_k^{(i)}=0$ 。
 
@@ -707,7 +698,7 @@ $$J(\Theta)=-\frac{1}{m}\sum_{i=1}^m\sum_k=1^Ky_k^{(i)}\log (\hat p_k^{(i)})$$
 
 损失函数关于$\theta^{(k)}$的梯度向量在公式4-23中给出：
 
-$$\nabla_{\theta^{(k)}}J(\Theta)=\frac{1}{m}\sum_{i=1}^m(\hat p_k^{(i)}-y_k^{(i)})\mathbf{x}^{(i)}$$
+![](http://latex.codecogs.com/gif.latex?%5Cnabla_%7B%5Ctheta%5E%7B%28k%29%7D%7DJ%28%5CTheta%29%3D%5Cfrac%7B1%7D%7Bm%7D%5Csum_%7Bi%3D1%7D%5Em%28%5Chat%20p_k%5E%7B%28i%29%7D-y_k%5E%7B%28i%29%7D%29%5Cmathbf%7Bx%7D%5E%7B%28i%29%7D)
 
 现在可以计算每个类的梯度向量了，之后使用梯度下降（或其他优化算法）来找到能最小化损失函数的参数矩阵$\Theta$。
 
