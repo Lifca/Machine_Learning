@@ -25,4 +25,86 @@ SVM 的基本思路可以用这些图片来很好地解释。图5-1展示了部�
 
 为了避免这些情况发生，最好使用更灵活的模型。目标是在两者之间找到平衡：保持通道尽可能大和限制间隔违规（*margin violations*）（即实例在通道中间，或者在错误的一侧）。这被称为**软间隔分类**（*soft margin classification*）。
 
-在 Scikit-Learn 中的 SVM 类中，你可以使用超参数`C`来控制平衡：小的`C`值会有更宽的通道，但是间隔违规也会
+在 Scikit-Learn 中的 SVM 类中，你可以使用超参数`C`来控制平衡：小的`C`值会有更宽的通道，但是间隔违规也会变多。图 5-4 展示了两个软间隔 SVM 分类器在非线性可分数据集上的决策边界和间隔，左图中，使用了较高的`C`值，分类器的间隔违规很少，但是间隔也很小。右图中，使用了较低的`C`值，间隔大多了，但有实例落在了通道里。不过，看起来还是第二个模型泛化得更好一：事实上，即便是在这个训练集上，它的预测误差也很小，因为大多数间隔违规的实例都分在了决策边界正确的一侧。
+
+![4](./images/chap5/5-4.png)
+
+> **提示**
+> 如果你的 SVM 模型过拟合了，可以试试降低`C`来正则化。
+
+下面的 Scikit-Learn 代码 载入了鸢尾花数据集，进行了特征缩放，训练了一个线性 SVM 模型（使用`LinearSVC`类，`C=0.1`，铰链损失函数，稍后会讨论）来检测维吉尼亚鸢尾花。最终模型为图 5-4 的右图。
+
+```python
+import numpy as np
+from sklearn import datasets
+from sklearn.pipeline import Pipeline
+from sklearn.preprocessing import StandardScaler
+from sklearn.svm import LinearSVC
+
+iris = datasets.load_iris()
+X = iris["data"][:, (2, 3)] # petal length, petal width
+y = (iris["target"] == 2).astype(np.float64) # Iris-Virginica
+
+svm_clf = Pipeline((
+        ("scaler", StandardScaler()),
+        ("linear_svc", LinearSVC(C=1, loss="hinge")),
+    ))
+
+svm_clf.fit(X_scaled, y)
+```
+
+然后，你就可以像往常一样使用模型来进行预测了：
+
+```python
+>>> svm_clf.predict([[5.5, 1.7]])
+array([ 1.])
+```
+
+> **笔记**
+> 不像逻辑回归分类器， SVM 分类器不输出每个类的概率。
+
+或者，你也可以使用`SVC`类，使用`SVC(kernel="linear",	C=1)`，但是它会更慢，尤其是当训练集很大时，所以并不推荐。另一个选择是使用`SGDClassifier`类，使用`SGDClassifier(loss="hinge",	alpha=1/(m*C))`。它应用了常规的随机梯度下降（见第四章）来训练线性 SVM 分类器。它不像`LinearSVC`类收敛那么快，但是能处理内存中放不下的大数据集（核外训练），或者处理在线分类任务。
+
+> **提示**
+> `LinearSVC`类会正则化偏差项，所以首先你应该集中训练集，减去它们的平均值。如果你使用了`StandardScaler`来缩放数据，那么它会自动完成。此外，确保你把超参数`loss`设置为`hinge`，因为它不是默认值。最后，为了更好的性能你，你应该把超参数`dual`设置为`False`，除非特征比训练实例还多（我们会在本章稍后讨论对偶性）。
+
+## 非线性 SVM 分类器
+
+尽管线性 SVM 分类器既高效，又在许多时候表现优秀，但是很多数据集都不是线性可分的。一种处理非线性数据集的方法是增加更多的特征，比如多项式特征（就像你在第四章中做的那样），有时候这样能产生线性可分的数据集。考虑图 5-5 中的左图：它代表只有一个特征![](http://latex.codecogs.com/gif.latex?x_1)的简单数据集。如你所见，这个数据集不是线性可分的。不过如果增加第二个特征![](http://latex.codecogs.com/gif.latex?x_2%3D%28x_1%29%5E2)，生成的 2D 数据集就是完美的线性可分了。
+
+![5](./images/chap5/5-5.png)
+
+要使用 Scikit-Learn 实现这个想法，你可以创造一个包含`PolynomialFeatures`转换器（在“多项式回归”提到过）的`Pipeline`，然后再是`StandardScaler`和`LinearSVC`。让我们在卫星数据集上测试一下（见图 5-6）：
+
+![6](./images/chap5/5-6.png)
+
+```python
+from sklearn.datasets import make_moons
+from sklearn.pipeline import Pipeline
+from sklearn.preprocessing import PolynomialFeatures
+
+polynomial_svm_clf = Pipeline((
+        ("poly_features", PolynomialFeatures(degree=3)),
+        ("scaler", StandardScaler()),
+        ("svm_clf", LinearSVC(C=10, loss="hinge"))
+    ))
+
+polynomial_svm_clf.fit(X, y)
+```
+
+### 多项式核
+
+增加多项式特征很简单，在各种机器学习算法（不只是 SVM ）上表现都很好，但是低阶多项式不能处理很复杂的数据集，高阶多项式创造了大量数据，使模型运行过慢。
+
+幸运的是，使用 SVM 时你可以应用一种被称为**核技巧**（*kernel trick*，稍后会解释）的神奇数学技术。它能让你得到同样的结果——就像你添加了许多多项式特征一样，甚至是非常高阶的多项式——而并没有真的加上它们。所以不存在特征数的组合爆炸，因为你实际上并没有添加任何特征。这个技巧可以通过`SVC`类来实现。让我们在卫星数据集上测试一下：
+
+```python
+from sklearn.svm import SVC
+poly_kernel_svm_clf = Pipeline((
+        ("scaler", StandardScaler()),
+        ("svm_clf", SVC(kernel="poly", degree=3, coef0=1, C=5))
+    ))
+poly_kernel_svm_clf.fit(X, y)
+```
+
+上面的代码使用了 3 阶多项式核训练了一个 SVM 分类器。
