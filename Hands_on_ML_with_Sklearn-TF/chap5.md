@@ -63,7 +63,7 @@ array([ 1.])
 > **笔记**
 > 不像逻辑回归分类器， SVM 分类器不输出每个类的概率。
 
-或者，你也可以使用`SVC`类，使用`SVC(kernel="linear",	C=1)`，但是它会更慢，尤其是当训练集很大时，所以并不推荐。另一个选择是使用`SGDClassifier`类，使用`SGDClassifier(loss="hinge",	alpha=1/(m*C))`。它应用了常规的随机梯度下降（见第四章）来训练线性 SVM 分类器。它不像`LinearSVC`类收敛那么快，但是能处理内存中放不下的大数据集（核外训练），或者处理在线分类任务。
+或者，你也可以使用`SVC`类，使用`SVC(kernel="linear",	C=1)`，但是它会更慢，尤其是当训练集很大时，所以并不推荐。另一个选择是使用`SGDClassifier`类，使用`SGDClassifier(loss="hinge",	alpha=1/(m*C))`。它应用了常规的随机梯度下降（见第四章）来训练线性 SVM 分类器。它不像`LinearSVC`类收敛那么快，但是能处理内存中放不下的大型数据集（核外训练），或者处理在线分类任务。
 
 > **提示**
 > `LinearSVC`类会正则化偏差项，所以首先你应该集中训练集，减去它们的平均值。如果你使用了`StandardScaler`来缩放数据，那么它会自动完成。此外，确保你把超参数`loss`设置为`hinge`，因为它不是默认值。最后，为了更好的性能你，你应该把超参数`dual`设置为`False`，除非特征比训练实例还多（我们会在本章稍后讨论对偶性）。
@@ -107,7 +107,7 @@ poly_kernel_svm_clf = Pipeline((
 poly_kernel_svm_clf.fit(X, y)
 ```
 
-上面的代码使用了 3 阶多项式核训练了一个 SVM 分类器，显示在左图中。右图是使用了 10 阶多项式核的另一个 SVM 分类器。显然，如果你的模型过拟合了，你可能想减少多项式的阶数。相反的，如果它欠拟合了，你可以试着提高阶数。超参数`coef0`控制高阶多项式和低阶多项式对模型的影响。
+上面的代码使用了 3 阶多项式核训练了一个 SVM 分类器，显示在左图中。右图是使用了 10 阶多项式核的另一个 SVM 分类器。显然，如果你的模型过拟合了，你可能想减少多项式的阶数。相反地，如果它欠拟合了，你可以试着提高阶数。超参数`coef0`控制高阶多项式和低阶多项式对模型的影响。
 
 ![7](./images/chap5/5-7.png)
 
@@ -124,6 +124,42 @@ poly_kernel_svm_clf.fit(X, y)
 
 ![8](./images/chap5/5-8.png)
 
-你也许想知道该如何选择地标。最简单的方法是给数据集中的每个实例都创建一个地标。
+你也许想知道该如何选择地标。最简单的方法是给数据集中的每个实例都创建一个地标。这样会创造许多维度，增加转换后的训练集是线性可分的可能性。缺点是有 ![](http://latex.codecogs.com/gif.latex?m) 个实例和 ![](http://latex.codecogs.com/gif.latex?n) 个特征的训练集会被转换为有 ![](http://latex.codecogs.com/gif.latex?m) 个实例和 ![](http://latex.codecogs.com/gif.latex?m) 个特征的训练集（假设你舍弃了原始特征）。如果你的训练集很大，你会得到数量同样大的特征。
 
 ### 高斯径向基核
+
+就像多项式特征理论一样，相似特征理论能用于任何机器学习算法，但是计算所有的特征可能会代价昂贵，尤其是在大型数据集上。不过，核技巧再一次施展了 SVM 魔法：它使获得相似结果成为可能，就像你已经添加了相似特征，而不用真的添加它们。让我们用`SVC`类来尝试高斯径向基核：
+
+```python
+rbf_kernel_svm_clf = Pipeline((
+        ("scaler", StandardScaler()),
+        ("svm_clf", SVC(kernel="rbf", gamma=5, C=0.001))
+    ))
+rbf_kernel_svm_clf.fit(X, y)
+```
+
+图 5-9 的左下角就是上述模型。其他的图是用不同的超参数`gamma`（![](http://latex.codecogs.com/gif.latex?%5Cgamma)）和 ![](http://latex.codecogs.com/gif.latex?C) 训练的模型。增加`gamma`会使钟型曲线更窄（看图 5-8 的左图），每个实例的影响范围也变小了：决策边界更不规律，在单个实例周围环绕。相反地，小的`gamma`值会使钟型曲线更宽，实例有更大的影响范围，决策边界也会更平滑。所以 ![](http://latex.codecogs.com/gif.latex?%5Cgamma) 就像正则化参数一样：如果你的模型过拟合了，你应该减小它，；如果欠拟合了，就增大它（和超参数`C`很相似）。
+
+![9](./images/chap5/5-9.png)
+
+也有其他类型的核，不过用的很少。例如，有些核专门用于特定的数据结构。**字符串核**（*String kernels*）有时用于分类文本文档或 DNA 序列（比如，使用字符串子序列核（*string subsequence kernel*）或者基于莱文斯坦距离（*Levenshtein distance*）的核）。
+
+> **提示**
+> 有这么多种核可供选择，如何决定用哪个呢？一般来说，你应该首先尝试用线性核（记住，`LinearSVC`比`SVC(kernel="linear")`要快得多），尤其是当训练集很大或者特征很多的时候。如果训练集不是太大，你应该尝试用高斯径向基核，它在大多数时候表现都很好。如果你有空闲时间和计算能力，你也可以通过交叉验证和网格搜索体验一下其他的核，尤其是如果有核专门用于你训练集的数据结构。
+
+### 计算复杂度
+
+`LinearSVC`类基于`liblinear`库，它实现了线性 SVM 的优化算法。它不支持核技巧，不过它训练实例的数量和特征的数量几乎是线性缩放的：训练时间复杂度大约在 ![](http://latex.codecogs.com/gif.latex?O%28m%5Ctimes%20n%29)。
+
+如果你需要很高的准确率，算法会花费更多时间。这是由容差超参数 ![](http://latex.codecogs.com/gif.latex?%5Cepsilon)（在 Scikit-Learn 中称为`tol`）控制的在。在大多数分类任务中，默认的容差已经很好了。
+
+`SVC`类基于`libsvm`库，它实现了支持核技巧的[一个算法](https://www.microsoft.com/en-us/research/publication/sequential-minimal-optimization-a-fast-algorithm-for-training-support-vector-machines/?from=http%3A%2F%2Fresearch.microsoft.com%2Fpubs%2F69644%2Ftr-98-14.pdf)。训练时间复杂度常在 ![](http://latex.codecogs.com/gif.latex?O%28m%5E2%5Ctimes%20n%29) 和 ![](http://latex.codecogs.com/gif.latex?O%28m%5E3%5Ctimes%20n%29) 之间。不幸的是，这意味着当训练实例的数量变大时（比如成千上万的实例），它会惊人得慢。这个算法完美适用于复杂但是小型或中型的训练集。不过，它对特征数量有很好的缩放，尤其是对于稀疏特征（即每个实例都几乎没有非零特征）。在本例中，算法粗略地缩放了每个实例非零特征的平均数量。表格 5-1 比较了 Scikit-Learn 的 SVM 分类器的种类。
+
+![](./images/chap5/5-table.png)
+
+## SVM 回归
+
+我们之前提到过，SVM 算法是非常全能的：不只是支持线性和非线性的分类，而且支持线性和非线性的回归。技巧是转换目标：无需试着拟合两类间的最大通道而避免间隔违规，SVM 回归想要尽可能多的在通道上拟合实例。
+
+![10](./images/chap5/5-10.png)
+
