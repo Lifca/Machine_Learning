@@ -70,7 +70,7 @@ array([ 1.])
 
 ## 非线性 SVM 分类器
 
-尽管线性 SVM 分类器既高效，又在许多时候表现优秀，但是很多数据集都不是线性可分的。一种处理非线性数据集的方法是增加更多的特征，比如多项式特征（就像你在第四章中做的那样），有时候这样能产生线性可分的数据集。考虑图 5-5 中的左图：它代表只有一个特征![](http://latex.codecogs.com/gif.latex?x_1)的简单数据集。如你所见，这个数据集不是线性可分的。不过如果增加第二个特征![](http://latex.codecogs.com/gif.latex?x_2%3D%28x_1%29%5E2)，生成的 2D 数据集就是完美的线性可分了。
+尽管线性 SVM 分类器既高效，又在许多时候表现优秀，但是很多数据集都不是线性可分的。一种处理非线性数据集的方法是增加更多的特征，比如多项式特征（就像你在第四章中做的那样），有时候这样能产生线性可分的数据集。考虑图 5-5 中的左图：它代表只有一个特征 ![](http://latex.codecogs.com/gif.latex?x_1) 的简单数据集。如你所见，这个数据集不是线性可分的。不过如果增加第二个特征 ![](http://latex.codecogs.com/gif.latex?x_2%3D%28x_1%29%5E2) ，生成的 2D 数据集就是完美的线性可分了。
 
 ![5](./images/chap5/5-5.png)
 
@@ -107,4 +107,23 @@ poly_kernel_svm_clf = Pipeline((
 poly_kernel_svm_clf.fit(X, y)
 ```
 
-上面的代码使用了 3 阶多项式核训练了一个 SVM 分类器。
+上面的代码使用了 3 阶多项式核训练了一个 SVM 分类器，显示在左图中。右图是使用了 10 阶多项式核的另一个 SVM 分类器。显然，如果你的模型过拟合了，你可能想减少多项式的阶数。相反的，如果它欠拟合了，你可以试着提高阶数。超参数`coef0`控制高阶多项式和低阶多项式对模型的影响。
+
+![7](./images/chap5/5-7.png)
+
+> **提示**
+> 一种找到正确超参数值的通用方法是使用网格搜索（见第二章）。先做一遍粗略的网格搜索是很快的，然后在找到的最优值之间进行一遍仔细的网格搜索。对每种超参数的作用有良好的理解有助于你在正确的超参数空间进行搜索。
+
+### 增加相似特征
+
+另一种处理非线性问题的技术是使用**相似函数**（*similarity function*）来增加特征，它测量每个实例与特定地标（*landmark*）的相似度。例如，取之前讨论的一维数据集，增加两个地标： ![](http://latex.codecogs.com/gif.latex?x_1%3D-2) 和 ![](http://latex.codecogs.com/gif.latex?x_1%3D1)（见图 5-8 中的左图）。接下来，将相似度函数定义为 ![](http://latex.codecogs.com/gif.latex?%5Cgamma%3D0.3) 的高斯**径向基函数**（*Radial Basis Function*，RBF）（见公式 5-1）。
+
+![](http://latex.codecogs.com/gif.latex?%5Cphi_%7B%5Cgamma%7D%28%5Cmathbf%7Bx%7D%2C%5Cell%29%20%3D%5Cexp%20%28-%5Cgamma%5Cleft%20%5C%7C%20%5Cmathbf%7Bx%7D-%5Cell%20%5Cright%20%5C%7C%5E2%29)
+
+它是个范围从 0（离地标很远）到 1（在地标上）的钟型函数。现在我们准备好计算新特征了。例如，来看实例 ![](http://latex.codecogs.com/gif.latex?x_1%3D1) ：它和第一个地标的距离是 1，和第二个地标的距离是 2。所以它的新特征是 ![](http://latex.codecogs.com/gif.latex?x_2%3D%5Cexp%28-0.3%5Ctimes%201%5E2%29%5Capprox%200.74) 和 ![](http://latex.codecogs.com/gif.latex?x_3%3D%5Cexp%28-0.3%5Ctimes%202%5E2%29%5Capprox%200.30) 。图 5-8 中的右图显示了转换后的数据集（舍弃了原始特征）。如你所见，现在它是线性可分的了。
+
+![8](./images/chap5/5-8.png)
+
+你也许想知道该如何选择地标。最简单的方法是给数据集中的每个实例都创建一个地标。
+
+### 高斯径向基核
