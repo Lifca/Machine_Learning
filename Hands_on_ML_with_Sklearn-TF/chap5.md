@@ -159,7 +159,55 @@ rbf_kernel_svm_clf.fit(X, y)
 
 ## SVM 回归
 
-我们之前提到过，SVM 算法是非常全能的：不只是支持线性和非线性的分类，而且支持线性和非线性的回归。技巧是转换目标：无需试着拟合两类间的最大通道而避免间隔违规，SVM 回归想要尽可能多的在通道上拟合实例。
+我们之前提到过，SVM 算法是非常全能的：不只是支持线性和非线性的分类，而且支持线性和非线性的回归。技巧是转换目标：无需试着拟合两类间的最大通道而避免间隔违规，SVM 回归要尽可能多的在通道上拟合实例（即，把实例放在通道上）。通道的宽度由超参数 ![](http://latex.codecogs.com/gif.latex?%5Cepsilon) 控制，图 5-10 展示了两个在随机线性数据上训练的线性 SVM 回归模型，一个是大间隔（ ![](http://latex.codecogs.com/gif.latex?%5Cepsilon%3D1.5) ），另一个是小间隔（ ![](http://latex.codecogs.com/gif.latex?%5Cepsilon%3D0.5) ）。
 
 ![10](./images/chap5/5-10.png)
 
+增加更多的训练实例在间隔之间并不会影响模型的预测，因此，模型被认为是对 ![](http://latex.codecogs.com/gif.latex?%5Cepsilon) 不敏感的。
+
+你可以使用 Scikit-Learn 的`LinearSVR`类来实现线性 SVM 回归。下面的代码会生成图 5-10 左边的模型（训练数据首先要进行缩放，并放在中间）。
+
+```python
+from sklearn.svm import LinearSVR
+
+svm_reg = LinearSVR(epsilon=1.5)
+svm_reg.fit(X, y)
+```
+
+要解决非线性回归任务，你可以使用核化的 SVM 模型。例如，图 5-11 展示了在随机二次训练集上使用了 2 阶多项式核的 SVM 回归。左图中几乎没有正则化（即`C`值很大），右图则进行了正则化（即`C`值很小）。
+
+![11](./images/chap5/5-11.png)
+
+下面的代码使用了 Scikit-Learn 的`SVR`类（支持核技巧），会生成图 5-11 左图中的模型。`SVR`类和`SVC`一样，`LinearSVR`和`LinearSVC`一样，不过是回归。`LinearSVR`类和训练集的大小呈线性关系（就像`LinearSVC`类），而`SVR`类在训练集增大时就会变慢（就像`SVC`类）。
+
+```python
+from sklearn.svm import SVR
+
+svm_poly_reg = SVR(kernel="poly", degree=2, C=100, epsilon=0.1)
+svm_poly_reg.fit(X, y)
+```
+
+> **笔记**
+> SVM 也能用于异常值检测，详情见 Scikit-Learn的文档。
+
+## 原理
+
+本节会解释 SVM 是如何进行预测的，以及它的训练算法是如何工作的，先从线性 SVM 分类器开始。如果你刚开始学习机器学习，你能安心跳过这部分，直接到本章结尾的练习，以后当你想更深入了解 SVM 的时候再回来。
+
+首先，关于符号的一些说明：在第四章中，我们依照惯例将所有模型参数放进向量 ![](http://latex.codecogs.com/gif.latex?%5Ctheta) 中，包括偏差项 ![](http://latex.codecogs.com/gif.latex?%5Ctheta_0) 和 输入特征 ![](http://latex.codecogs.com/gif.latex?%5Ctheta_1) 到 ![](http://latex.codecogs.com/gif.latex?%5Ctheta_n) ，以及一个对所有实例的偏差输入 ![](http://latex.codecogs.com/gif.latex?x_0%3D1)。在本章中，我们将使用不同的约定，当你处理 SVM 的时候会更加方便（也更加普遍）：偏差项称为 ![](http://latex.codecogs.com/gif.latex?b) ，特征权重向量称为 ![](http://latex.codecogs.com/gif.latex?%5Cmathbf%7Bw%7D)。特征向量中不加入偏差特征。
+
+### 决策函数及其预测
+
+线性 SVM 分类器模型通过计算决策函数 ![](http://latex.codecogs.com/gif.latex?%5Cmathbf%7Bw%7D%5ET%5Ccdot%20%5Cmathbf%7Bx%7D&plus;b%3Dw_1x_1&plus;%5Ccdots&plus;w_nx_n&plus;b) 来预测新实例 ![](http://latex.codecogs.com/gif.latex?%5Cmathbf%7Bx%7D) 的类别：如果结果是正值，预测类 ![](http://latex.codecogs.com/gif.latex?%5Chat%20y) 就是正类（1），否则是负类（0），见公式 5-2。
+
+![](http://latex.codecogs.com/gif.latex?%5Chat%20y%3D%5Cbegin%7Bcases%7D%200%20%26%20%5Cmathrm%7Bif%7D%5C%20%5Cmathbf%7Bw%7D%5ET%5Ccdot%5Cmathbf%7Bx%7D&plus;b%3C0%20%5C%5C%201%20%26%20%5Cmathrm%7Bif%7D%5C%20%5Cmathbf%7Bw%7D%5ET%5Ccdot%5Cmathbf%7Bx%7D&plus;b%5Cgeq%200%20%5Cend%7Bcases%7D)
+
+图 5-12 展示了与图 5-4右图模型相对应的决策函数：它是个二维的平面，因为数据集有两个特征（花瓣长度与花萼长度）。决策边界是一系列决策函数等于 0 的点：它是两个平面的交点，是一条直线（图中的细实线）。
+
+![12](./images/chap5/5-12.png)
+
+虚线代表决策函数等于 1 或 -1 的点：它们互相平行，到决策边界的距离相等，并在它周围形成间隔。训练一个线性 SVM 分类器意味着要找到 ![](http://latex.codecogs.com/gif.latex?%5Cmathbf%7Bw%7D) 和 ![](http://latex.codecogs.com/gif.latex?b) ，使间隔尽可能大，又要避免间隔违规（硬间隔）或者限制间隔违规（软间隔）。
+
+### 训练目标
+
+考虑决策函数的斜率：它等于权重向量的范数， ![](http://latex.codecogs.com/gif.latex?%5Cleft%20%5C%7C%20%5Cmathbf%7Bw%7D%20%5Cright%20%5C%7C) 。如果我们将斜率除以 2 ，
