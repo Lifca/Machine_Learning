@@ -237,9 +237,22 @@ svm_poly_reg.fit(X, y)
 
 ### 对偶问题
 
-给定一个约束优化问题，称为**原始问题**（*primal problem*），它可能表示另一个不同的但是密切相关的问题，称为它的**对偶问题**（*dual problem*）。
+给定一个约束优化问题，称为**原始问题**（*primal problem*），它可能表示另一个不同的但是密切相关的问题，称为它的**对偶问题**（*dual problem*）。对偶问题的解通常是对原始问题的解给出一个下界约束，不过在某些情况下可能会得到和原始问题相同的解。幸运的是， SVM 问题碰巧满足这些条件，所以你可以选择解决原始问题或对偶问题，它们的解是相同的。公式 5-6 展示了线性 SVM 目标的对偶形式（如果你对如何从原始问题得到对偶问题感兴趣，参阅附录 C ）。
+
+![]()
+
+一旦你找到了能最小化公式（使用 QP 解决器）的向量 ![](http://latex.codecogs.com/gif.latex?%5Chat%7B%5Calpha%7D) ，你就能使用公式 5-7 计算能最小化原始问题的 ![](http://latex.codecogs.com/gif.latex?%5Chat%7B%5Cmathbf%7Bw%7D%7D) 和 ![](http://latex.codecogs.com/gif.latex?%5Chat%7Bb%7D) 。
+
+![](http://latex.codecogs.com/gif.latex?%5Chat%7B%5Cmathbf%7Bw%7D%7D%3D%5Csum_%7Bi%3D1%7D%5Em%5Chat%7B%5Calpha%7D%5E%7B%28i%29%7Dt%5E%7B%28i%29%7D%5Cmathbf%7Bx%7D%5E%7B%28i%29%7D)
+![](http://latex.codecogs.com/gif.latex?%5Chat%7Bb%7D%3D%5Cfrac%7B1%7D%7Bn_s%7D%5Csum_%7Bi%3D1%7D%5Em%281-t%5E%7B%28i%29%7D%28%5Chat%7B%5Cmathbf%7Bw%7D%7D%5ET%5Ccdot%5Cmathbf%7Bx%7D%5E%7B%28i%29%7D%29%29%5C%3B%20%5C%3B%20%5C%3B%20%5Chat%7B%5Calpha%7D%5E%7B%28i%29%7D%3E0)
+
+当训练实例数比特征数小时，对偶问题比原始问题解决得更快。更重要的是，它可以使用核技巧，而原始问题不行。所以这个核技巧究竟是什么？
 
 ### 核化 SVM
+
+假设你想要将 2 阶多项式转换应用于一个二维的训练集（比如卫星训练集），并在转换后的训练集上训练一个线性 SVM 分类器。公式 5-8 展示了你想应用的 2 阶多项式映射函数。
+
+![]()
 
 ### 在线 SVM
 
