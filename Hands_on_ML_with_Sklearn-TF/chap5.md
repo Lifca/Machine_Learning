@@ -202,7 +202,7 @@ svm_poly_reg.fit(X, y)
 
 ![](http://latex.codecogs.com/gif.latex?%5Chat%20y%3D%5Cbegin%7Bcases%7D%200%20%26%20%5Cmathrm%7Bif%7D%5C%20%5Cmathbf%7Bw%7D%5ET%5Ccdot%5Cmathbf%7Bx%7D&plus;b%3C0%20%5C%5C%201%20%26%20%5Cmathrm%7Bif%7D%5C%20%5Cmathbf%7Bw%7D%5ET%5Ccdot%5Cmathbf%7Bx%7D&plus;b%5Cgeq%200%20%5Cend%7Bcases%7D)
 
-图 5-12 展示了与图 5-4右图模型相对应的决策函数：它是个二维的平面，因为数据集有两个特征（花瓣长度与花萼长度）。决策边界是一系列决策函数等于 0 的点：它是两个平面的交点，是一条直线（图中的细实线）。
+图 5-12 展示了与图 5-4 右图模型相对应的决策函数：它是个二维的平面，因为数据集有两个特征（花瓣长度与花萼长度）。决策边界是一系列决策函数等于 0 的点：它是两个平面的交点，是一条直线（图中的细实线）。
 
 ![12](./images/chap5/5-12.png)
 
@@ -210,4 +210,18 @@ svm_poly_reg.fit(X, y)
 
 ### 训练目标
 
-考虑决策函数的斜率：它等于权重向量的范数， ![](http://latex.codecogs.com/gif.latex?%5Cleft%20%5C%7C%20%5Cmathbf%7Bw%7D%20%5Cright%20%5C%7C) 。如果我们将斜率除以 2 ，
+考虑决策函数的斜率：它等于权重向量的范数， ![](http://latex.codecogs.com/gif.latex?%5Cleft%20%5C%7C%20%5Cmathbf%7Bw%7D%20%5Cright%20%5C%7C) 。如果我们将斜率除以 2 ，决策函数等于 ±1 的点到决策边界的距离会变为 2 倍。换言之，斜率减小为原来的一半，间隔会变为原来的两倍。也许在 图 5-13 的 2D 图中更容易可视化。权重向量 ![](http://latex.codecogs.com/gif.latex?%5Cmathbf%7Bw%7D) 越小，间隔越大。
+
+![13](./images/chap5/5-13.png)
+
+所以我们想要最小化 ![](http://latex.codecogs.com/gif.latex?%5Cleft%20%5C%7C%20%5Cmathbf%7Bw%7D%20%5Cright%20%5C%7C) 来得到更大的间隔。不过，如果我们也希望能避免间隔违规（硬间隔），对于所有正的训练实例，我们得让决策函数大于 1 ，对于所有负的训练实例则小于 -1 。如果我们定义，对于负的实例（ ![](http://latex.codecogs.com/gif.latex?y%5E%7B%28i%29%7D%3D0) ） ![](http://latex.codecogs.com/gif.latex?t%5E%7B%28i%29%7D%3D-1) ，对于正的实例（ ![](http://latex.codecogs.com/gif.latex?y%5E%7B%28i%29%7D%3D1) ） ![](http://latex.codecogs.com/gif.latex?t%5E%7B%28i%29%7D%3D1) ，那么我们可以将所有实例表示为 ![](http://latex.codecogs.com/gif.latex?t%5E%7B%28i%29%7D%28%5Cmathbf%7Bw%7D%5ET%5Ccdot%5Cmathbf%7Bx%7D%5E%7B%28i%29%7D&plus;b%29%5Cgeq%201) 。
+
+因此，我们能将硬间隔线性 SVM 分类器的目标表示为公式 5-3 的约束优化问题：
+
+![](http://latex.codecogs.com/gif.latex?%5Cmathrm%7Bminimize%7D%5C%3B%20%5C%20%5Cfrac%7B1%7D%7B2%7D%5Cmathbf%7Bw%7D%5ET%5Ccdot%5Cmathbf%7Bw%7D%5C%5C%20%5Cmathrm%7Bsubject%5C%20to%7D%5C%3B%20%5C%20t%5E%7B%28i%29%7D%28%5Cmathbf%7Bw%7D%5ET%5Ccdot%5Cmathbf%7Bx%7D%5E%7B%28i%29%7D&plus;b%29%5Cgeq%201%5C%3B%20%5C%3B%20i%3D1%2C2%2C%5Ccdots%2Cm)
+
+> **笔记**
+> 我们要
+
+要得到软间隔的目标，我们需要引入一个松弛变量 ![](http://latex.codecogs.com/gif.latex?%5Czeta%5E%7B%28i%29%7D%20%5Cgeq%200) ，应用到每个实例上： ![](http://latex.codecogs.com/gif.latex?%5Czeta%5E%7B%28i%29%7D) 测量第 i 个实例允许违规的程度。我们现在有了两个对立的目标：让松弛变量尽可能小而减少间隔违规，以及使 ![](http://latex.codecogs.com/gif.latex?%5Cfrac%7B1%7D%7B2%7D%5Cmathbf%7Bw%7D%5ET%5Ccdot%5Cmathbf%7Bw%7D) 尽可能小而增加间隔。这就是要用到超参数`C`的地方：它允许我们定义两者间的权衡。这就给了我们公式 5-4 中的约束优化问题。
+
