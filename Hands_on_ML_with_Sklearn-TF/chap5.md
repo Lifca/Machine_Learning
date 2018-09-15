@@ -1,10 +1,10 @@
 # 第五章 支持向量机
 
-支持向量机（*Support Vector Machine*, SVM）是一种非常强大而多功能的机器学习莫衷，能实现线性和非线性分类、回归甚至异常值检测。它是机器学习中最流行的模型之一，凡是对机器学习感兴趣的人都必备的工具。 SVM 尤其适合小型或中型数据集的复杂分类问题。
+支持向量机（*Support Vector Machine*, SVM）是一种非常强大而多功能的机器学习模型，能实现线性和非线性分类、回归甚至异常值检测。它是机器学习中最流行的模型之一，凡是对机器学习感兴趣的人都必备的工具。 SVM 尤其适合小型或中型数据集的复杂分类问题。
 
 本章会解释 SVM 的核心准则，以及如何使用它们，它们是如何工作的。
 
-## 线性支持向量机分类
+## 线性 SVM 分类
 
 SVM 的基本思路可以用这些图片来很好地解释。图5-1展示了部分鸢尾花数据集，在第四章中有所介绍。这两类很容易用一条直线来划分（它们是线性可分的）。左图展示了三种线性分类器的决策边界。虚线所表示的模型表现过差，甚至没能合适地把两类分开。其余的两个模型在训练集上表现优秀，但是它们的决策边界离实例太近了，在新实例上可能不会表现很好。相比之下，右图中的实线代表 SVM 分类器的决策边界，它不仅划分了两个类别，而且离最近的实例尽可能的远。你可以认为 SVM 在两类之间保持了最宽通道（以平行虚线表示）。这被称为**大间隔分类**（*large margin classification*）。
 
@@ -68,7 +68,7 @@ array([ 1.])
 > **提示**
 > `LinearSVC`类会正则化偏差项，所以首先你应该集中训练集，减去它们的平均值。如果你使用了`StandardScaler`来缩放数据，那么它会自动完成。此外，确保你把超参数`loss`设置为`hinge`，因为它不是默认值。最后，为了更好的性能你，你应该把超参数`dual`设置为`False`，除非特征比训练实例还多（我们会在本章稍后讨论对偶性）。
 
-## 非线性 SVM 分类器
+## 非线性 SVM 分类
 
 尽管线性 SVM 分类器既高效，又在许多时候表现优秀，但是很多数据集都不是线性可分的。一种处理非线性数据集的方法是增加更多的特征，比如多项式特征（就像你在第四章中做的那样），有时候这样能产生线性可分的数据集。考虑图 5-5 中的左图：它代表只有一个特征 ![](http://latex.codecogs.com/gif.latex?x_1) 的简单数据集。如你所见，这个数据集不是线性可分的。不过如果增加第二个特征 ![](http://latex.codecogs.com/gif.latex?x_2%3D%28x_1%29%5E2) ，生成的 2D 数据集就是完美的线性可分了。
 
@@ -221,7 +221,52 @@ svm_poly_reg.fit(X, y)
 ![](http://latex.codecogs.com/gif.latex?%5Cmathrm%7Bminimize%7D%5C%3B%20%5C%20%5Cfrac%7B1%7D%7B2%7D%5Cmathbf%7Bw%7D%5ET%5Ccdot%5Cmathbf%7Bw%7D%5C%5C%20%5Cmathrm%7Bsubject%5C%20to%7D%5C%3B%20%5C%20t%5E%7B%28i%29%7D%28%5Cmathbf%7Bw%7D%5ET%5Ccdot%5Cmathbf%7Bx%7D%5E%7B%28i%29%7D&plus;b%29%5Cgeq%201%5C%3B%20%5C%3B%20i%3D1%2C2%2C%5Ccdots%2Cm)
 
 > **笔记**
-> 我们要
+> 我们要最小化 ![](http://latex.codecogs.com/gif.latex?%5Cfrac%7B1%7D%7B2%7D%5Cmathbf%7Bw%7D%5ET%5Ccdot%5Cmathbf%7Bw%7D) ，它等于 ![](http://latex.codecogs.com/gif.latex?%5Cfrac%7B1%7D%7B2%7D%5Cleft%20%5C%7C%20%5Cmathbf%7Bw%7D%20%5Cright%20%5C%7C%5E2)  ，但我们并不是要最小化 ![](http://latex.codecogs.com/gif.latex?%5Cleft%20%5C%7C%20%5Cmathbf%7Bw%7D%20%5Cright%20%5C%7C) 。这是因为得到的结果是相同的（因为最小化一个值的 ![](http://latex.codecogs.com/gif.latex?%5Cmathbf%7Bw%7D) 和 ![](http://latex.codecogs.com/gif.latex?b) 也是最小化该值平方的一半），但是 ![](http://latex.codecogs.com/gif.latex?%5Cfrac%7B1%7D%7B2%7D%5Cleft%20%5C%7C%20%5Cmathbf%7Bw%7D%20%5Cright%20%5C%7C%5E2) 有又好又简单的导数（只有 ![](http://latex.codecogs.com/gif.latex?%5Cmathbf%7Bw%7D) ），而 ![](http://latex.codecogs.com/gif.latex?%5Cleft%20%5C%7C%20%5Cmathbf%7Bw%7D%20%5Cright%20%5C%7C) 在 ![](http://latex.codecogs.com/gif.latex?%5Cmathbf%7Bw%7D%3D0) 处不可微。优化算法在可微函数上表现更好。
 
 要得到软间隔的目标，我们需要引入一个松弛变量 ![](http://latex.codecogs.com/gif.latex?%5Czeta%5E%7B%28i%29%7D%20%5Cgeq%200) ，应用到每个实例上： ![](http://latex.codecogs.com/gif.latex?%5Czeta%5E%7B%28i%29%7D) 测量第 i 个实例允许违规的程度。我们现在有了两个对立的目标：让松弛变量尽可能小而减少间隔违规，以及使 ![](http://latex.codecogs.com/gif.latex?%5Cfrac%7B1%7D%7B2%7D%5Cmathbf%7Bw%7D%5ET%5Ccdot%5Cmathbf%7Bw%7D) 尽可能小而增加间隔。这就是要用到超参数`C`的地方：它允许我们定义两者间的权衡。这就给了我们公式 5-4 中的约束优化问题。
 
+![](http://latex.codecogs.com/gif.latex?%5Cmathrm%7Bminimize%7D%5C%3B%20%5C%3B%20%5Cfrac%7B1%7D%7B2%7D%5Cmathbf%7Bw%7D%5ET%5Ccdot%5Cmathbf%7Bw%7D&plus;C%5Csum_%7Bi%3D1%7D%5Em%5Czeta%5E%7B%28i%29%7D%5C%5C%20%5Cmathrm%7Bsubject%20to%7D%5C%3B%20%5C%3B%20t%5E%7B%28i%29%7D%28%5Cmathbf%7Bw%7D%5ET%5Ccdot%5Cmathbf%7Bx%7D%5E%7B%28i%29%7D&plus;b%29%5Cgeq%201-%5Czeta%5E%28i%29%5C%3B%5C%3B%20%5Cmathrm%7Band%7D%5C%3B%5C%3B%20%5Czeta%5E%7B%28i%29%7D%5Cgeq%200%5C%3B%5C%3Bi%3D1%2C2%2C%5Ccdots%2Cm)
+
+### 二次规划
+
+硬间隔和软间隔的问题都是线性约束的凸二次优化问题。这种问题被称为**二次规划**（*Quadratic Programming*，QP）问题，有许多现成的解决方法可以用来解决二次规划问题，但这超出了本书的范围。公式 5-5 给出了一般问题的公式：
+
+![equation5-5]()
+
+注意表达式
+
+### 对偶问题
+
+给定一个约束优化问题，称为**原始问题**（*primal problem*），它可能表示另一个不同的但是密切相关的问题，称为它的**对偶问题**（*dual problem*）。
+
+### 核化 SVM
+
+### 在线 SVM
+
+在总结本章之前，让我们来快速了解一下在线 SVM 分类器（回想一下，在线学习意味着当有新实例到达时要增量学习）。
+
+对于线性 SVM 分类器，一种理论是使用梯度下降（比如`SGDClassifier`）来最小化公式 5-13 中源于原始问题的损失函数。不幸的是，它比基于 QP 的方法收敛慢得多。
+
+![](http://latex.codecogs.com/gif.latex?J%28%5Cmathbf%7Bw%7D%2Cb%29%3D%5Cfrac%7B1%7D%7B2%7D%5Cmathbf%7Bw%7D%5ET%5Ccdot%5Cmathbf%7Bw%7D&plus;C%5Csum_%7Bi%3D1%7D%5E%7Bm%7D%5Cmax%280%2C1-t%5E%7B%28i%29%7D%28%5Cmathbf%7Bw%7D%5Ccdot%5Cmathbf%7Bx%7D%5E%7B%28i%29%7D&plus;b%29%29)
+
+损失函数中第一项会使模型有一个小权重向量 ![](http://latex.codecogs.com/gif.latex?%5Cmathbf%7Bw%7D) ，间隔会更大。第二项计算了所有间隔违规的总和。当一个实例在通道上并在正确的一侧，或者它和通道正确一侧的距离成比例，它的间隔违规等于 0 。最小化这一项确保模型让间隔违规尽可能小，也尽可能少。
+
+> **铰链损失**
+>
+> 函数 ![](http://latex.codecogs.com/gif.latex?%5Cmax%280%2C1-t%29) 被称为铰链损失函数（如下）。当 ![](http://latex.codecogs.com/gif.latex?t%5Cgeq%201) 时，它等于 0 。如果 ![](http://latex.codecogs.com/gif.latex?t%3C%201) 它的导数（斜率）等于 -1 ，如果 ![](http://latex.codecogs.com/gif.latex?t%3E1) ，导数等于 0 。在 ![](http://latex.codecogs.com/gif.latex?t%3D1) 处函数不可微，不过就像 Lasso 回归，在 ![](http://latex.codecogs.com/gif.latex?t%3D1) 时（即 -1 到 0 间的任意值）你依旧可以通过次导数使用梯度下降。
+> ![hinge]()
+
+也可以实现在线核化 SVM ——比如，使用“[递增与递减 SVM 学习](http://isn.ucsd.edu/papers/nips00_inc.pdf)”或“[在线和主动的快速核分类器](http://www.jmlr.org/papers/volume6/bordes05a/bordes05a.pdf)”。不过，这些都是用 MATLAB 和 C++ 实现的。对于大规模的非线性问题，你可能会考虑使用神经网络（见第二部分）。
+
+## 练习
+
+1. 支持向量机的基础思想是什么？
+2. 支持向量是什么？
+3. 为什么在使用 SVM 的时候缩放输入数据很重要？
+4. 当 SVM 分类器分类实例时，它能输出置信值吗？概率呢？
+5. 在一个包含数百万实例和数百个特征的训练集上，你你应该使用 SVM 的原始形式还是对偶形式来训练模型？
+6. 假设你用 RBF 核训练了一个 SVM 分类器。而它似乎欠拟合了训练集：你应该增加还是减少`gamma`值？`C`值呢？
+7. 你该如何设置 QP 参数 ![](http://latex.codecogs.com/gif.latex?%28%5Cmathbf%7BH%7D%2C%5Cmathbf%7Bf%7D%2C%5Cmathbf%7BA%7D%2C%5Cmathbf%7Bb%7D%29) ，使用现成的 QP 解决器来解决软间隔线性 SVM 分类器问题？
+8. 在线性可分的数据集上训练一个`LinearSVC`。之后在相同的数据集上再训练`SVC`和`SGDClassifier`。看看你是否能得到大致相同的模型。
+9. 在 MNIST 数据集上训练一个 SVM 分类器。因为 SVM 分类器是二分类器，你需要使用一对所有来分类十个数字。你也许想要使用少量验证集来调参，加速进程。你能达到怎样的精度？
+10. 在加利福尼亚房价数据集上训练一个 SVM 回归器。
