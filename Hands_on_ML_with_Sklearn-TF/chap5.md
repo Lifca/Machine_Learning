@@ -66,7 +66,7 @@ array([ 1.])
 或者，你也可以使用`SVC`类，使用`SVC(kernel="linear",	C=1)`，但是它会更慢，尤其是当训练集很大时，所以并不推荐。另一个选择是使用`SGDClassifier`类，使用`SGDClassifier(loss="hinge",	alpha=1/(m*C))`。它应用了常规的随机梯度下降（见第四章）来训练线性 SVM 分类器。它不像`LinearSVC`类收敛那么快，但是能处理内存中放不下的大型数据集（核外训练），或者处理在线分类任务。
 
 > **提示**
-> `LinearSVC`类会正则化偏差项，所以首先你应该集中训练集，减去它们的平均值。如果你使用了`StandardScaler`来缩放数据，那么它会自动完成。此外，确保你把超参数`loss`设置为`hinge`，因为它不是默认值。最后，为了更好的性能你，你应该把超参数`dual`设置为`False`，除非特征比训练实例还多（我们会在本章稍后讨论对偶性）。
+> `LinearSVC`类会正则化偏置项，所以首先你应该集中训练集，减去它们的平均值。如果你使用了`StandardScaler`来缩放数据，那么它会自动完成。此外，确保你把超参数`loss`设置为`hinge`，因为它不是默认值。最后，为了更好的性能你，你应该把超参数`dual`设置为`False`，除非特征比训练实例还多（我们会在本章稍后讨论对偶性）。
 
 ## 非线性 SVM 分类
 
@@ -194,7 +194,7 @@ svm_poly_reg.fit(X, y)
 
 本节会解释 SVM 是如何进行预测的，以及它的训练算法是如何工作的，先从线性 SVM 分类器开始。如果你刚开始学习机器学习，你能安心跳过这部分，直接到本章结尾的练习，以后当你想更深入了解 SVM 的时候再回来。
 
-首先，关于符号的一些说明：在第四章中，我们依照惯例将所有模型参数放进向量 ![](http://latex.codecogs.com/gif.latex?%5Ctheta) 中，包括偏差项 ![](http://latex.codecogs.com/gif.latex?%5Ctheta_0) 和 输入特征 ![](http://latex.codecogs.com/gif.latex?%5Ctheta_1) 到 ![](http://latex.codecogs.com/gif.latex?%5Ctheta_n) ，以及一个对所有实例的偏差输入 ![](http://latex.codecogs.com/gif.latex?x_0%3D1)。在本章中，我们将使用不同的约定，当你处理 SVM 的时候会更加方便（也更加普遍）：偏差项称为 ![](http://latex.codecogs.com/gif.latex?b) ，特征权重向量称为 ![](http://latex.codecogs.com/gif.latex?%5Cmathbf%7Bw%7D)。特征向量中不加入偏差特征。
+首先，关于符号的一些说明：在第四章中，我们依照惯例将所有模型参数放进向量 ![](http://latex.codecogs.com/gif.latex?%5Ctheta) 中，包括偏置项 ![](http://latex.codecogs.com/gif.latex?%5Ctheta_0) 和 输入特征 ![](http://latex.codecogs.com/gif.latex?%5Ctheta_1) 到 ![](http://latex.codecogs.com/gif.latex?%5Ctheta_n) ，以及一个对所有实例的偏置输入 ![](http://latex.codecogs.com/gif.latex?x_0%3D1)。在本章中，我们将使用不同的约定，当你处理 SVM 的时候会更加方便（也更加普遍）：偏置项称为 ![](http://latex.codecogs.com/gif.latex?b) ，特征权重向量称为 ![](http://latex.codecogs.com/gif.latex?%5Cmathbf%7Bw%7D)。特征向量中不加入偏置特征。
 
 ### 决策函数及其预测
 
@@ -233,7 +233,20 @@ svm_poly_reg.fit(X, y)
 
 ![equation5-5]()
 
-注意表达式
+注意表达式 ![](http://latex.codecogs.com/gif.latex?%5Cinline%20%5Cmathbf%7BA%7D%5Ccdot%5Cmathbf%7Bp%7D%5Cleq%20%5Cmathbf%7Bb%7D) 事实上定义了 ![](http://latex.codecogs.com/gif.latex?%5Cinline%20n_c) 约束： ![](http://latex.codecogs.com/gif.latex?%5Cinline%20%5Cmathbf%7Bp%7D%5ET%5Ccdot%5Cmathbf%7Ba%7D%5E%7B%28i%29%7D%5Cleq%20b%5E%7B%28i%29%7D%5C%3B%20%5C%3Bi%3D1%2C2%2C%5Ccdots%2Cn_c) ，![](http://latex.codecogs.com/gif.latex?%5Cinline%20%5Cmathbf%7Ba%7D%5E%7B%28i%29%7D) 是包括了 ![](http://latex.codecogs.com/gif.latex?%5Cinline%20%5Cmathbf%7BA%7D) 中第 ![](http://latex.codecogs.com/gif.latex?i) 行元素的向量，![](http://latex.codecogs.com/gif.latex?%5Cinline%20b%5E%7B%28i%29%7D) 是 ![](http://latex.codecogs.com/gif.latex?%5Cinline%20%5Cmathbf%7Bb%7D) 的第 ![](http://latex.codecogs.com/gif.latex?i) 个元素。
+
+很容易看到，如果你用下面的方法设置 QP 的参数，你会得到硬间隔线性 SVM 分类器的目标：
+
+- ![](http://latex.codecogs.com/gif.latex?%5Cinline%20n_p%3Dn&plus;1) ， ![](http://latex.codecogs.com/gif.latex?%5Cinline%20n) 是特征的数量（ +1 代表偏置项）
+- ![](http://latex.codecogs.com/gif.latex?%5Cinline%20n_c%3Dm) ， ![](http://latex.codecogs.com/gif.latex?%5Cinline%20m) 是训练实例的数量
+- ![](http://latex.codecogs.com/gif.latex?%5Cinline%20%5Cmathbf%7BH%7D) 是 ![](http://latex.codecogs.com/gif.latex?%5Cinline%20n_p%5Ctimes%20n_p) 的单位矩阵，除了左上角有一个零（忽略偏置项）
+- ![](http://latex.codecogs.com/gif.latex?%5Cinline%20%5Cmathbf%7Bf%3D0%7D) ，一个全为 0 的 ![](http://latex.codecogs.com/gif.latex?%5Cinline%20n_p) 维向量
+- ![](http://latex.codecogs.com/gif.latex?%5Cinline%20%5Cmathbf%7Bb%3D1%7D) ，一个全为 1 的 ![](http://latex.codecogs.com/gif.latex?%5Cinline%20n_c) 维向量
+- ![](http://latex.codecogs.com/gif.latex?%5Cinline%20%5Cmathbf%7Ba%7D%5E%7B%28i%29%7D%3D-t%5E%7B%28i%29%7D%5Cdot%7B%5Cmathbf%7BX%7D%7D%5E%7B%28i%29%7D) ， ![](http://latex.codecogs.com/gif.latex?%5Cinline%20%5Cdot%7B%5Cmathbf%7BX%7D%7D%5E%7B%28i%29%7D) 为带有一个额外偏置特征 ![](http://latex.codecogs.com/gif.latex?%5Cinline%20%5Cdot%7B%5Cmathbf%7BX%7D%7D_0%3D1) 的 ![](http://latex.codecogs.com/gif.latex?%5Cinline%20x%5E%7B%28i%29%7D) 。
+
+所以一种用于训练硬间隔线性 SVM 分类器的方法是仅使用现成的 QP 解决器，将之前的参数传递给它。得到的向量 ![](http://latex.codecogs.com/gif.latex?%5Cinline%20%5Cmathbf%7Bp%7D) 会包含偏置项 ![](http://latex.codecogs.com/gif.latex?%5Cinline%20b%3D%20p_0) 和特征权重 ![](http://latex.codecogs.com/gif.latex?%5Cinline%20w_i%3Dp_i%5C%3B%5C%3Bi%3D1%2C2%2C%5Ccdots%2Cm) 。类似的，你可以使用一个 QP 解决器来解决软间隔问题（看本章末尾的练习）。
+
+不过，为了使用核技巧，我们将会介绍另一种不同的约束优化问题。
 
 ### 对偶问题
 
@@ -252,7 +265,13 @@ svm_poly_reg.fit(X, y)
 
 假设你想要将 2 阶多项式转换应用于一个二维的训练集（比如卫星训练集），并在转换后的训练集上训练一个线性 SVM 分类器。公式 5-8 展示了你想应用的 2 阶多项式映射函数。
 
+![](http://latex.codecogs.com/gif.latex?%5Cinline%20%5Cphi%28%5Cmathbf%7Bx%7D%29%3D%5Cphi%5Cleft%20%28%20%5Cbegin%7Bpmatrix%7D%20x1%5C%5C%20x2%20%5Cend%7Bpmatrix%7D%20%5Cright%20%29%3D%20%5Cbegin%7Bpmatrix%7D%20x_1%5E2%5C%5C%20%5Csqrt%7B2%7D%5C%20x_1x_2%20%5C%5C%20x_2%5E2%20%5Cend%7Bpmatrix%7D)
+
+注意转换后的向量是三维的，而不是二维的。现在来看看，如果我们应用这些 2 阶多项式映射，并计算转换后向量的点积（见公式 5-9），那么这些二维向量 ![](http://latex.codecogs.com/gif.latex?%5Cmathbf%7Ba%7D) 和 ![](http://latex.codecogs.com/gif.latex?%5Cmathbf%7Bb%7D) 会发生什么。
+
 ![]()
+
+
 
 ### 在线 SVM
 
@@ -267,6 +286,7 @@ svm_poly_reg.fit(X, y)
 > **铰链损失**
 >
 > 函数 ![](http://latex.codecogs.com/gif.latex?%5Cmax%280%2C1-t%29) 被称为铰链损失函数（如下）。当 ![](http://latex.codecogs.com/gif.latex?t%5Cgeq%201) 时，它等于 0 。如果 ![](http://latex.codecogs.com/gif.latex?t%3C%201) 它的导数（斜率）等于 -1 ，如果 ![](http://latex.codecogs.com/gif.latex?t%3E1) ，导数等于 0 。在 ![](http://latex.codecogs.com/gif.latex?t%3D1) 处函数不可微，不过就像 Lasso 回归，在 ![](http://latex.codecogs.com/gif.latex?t%3D1) 时（即 -1 到 0 间的任意值）你依旧可以通过次导数使用梯度下降。
+> 
 > ![hinge]()
 
 也可以实现在线核化 SVM ——比如，使用“[递增与递减 SVM 学习](http://isn.ucsd.edu/papers/nips00_inc.pdf)”或“[在线和主动的快速核分类器](http://www.jmlr.org/papers/volume6/bordes05a/bordes05a.pdf)”。不过，这些都是用 MATLAB 和 C++ 实现的。对于大规模的非线性问题，你可能会考虑使用神经网络（见第二部分）。
