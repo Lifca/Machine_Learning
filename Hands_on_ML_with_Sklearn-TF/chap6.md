@@ -28,13 +28,13 @@ tree_clf.fit(X, y)
 from sklearn.tree import export_graphviz
 
 export_graphviz(
-		tree_clf,
-		out_file=image_path("iris_tree.dot"),
-		feature_names=iris.feature_names[2:],
-		class_names=iris.target_names,
-		rounded=True,
-		filled=True
-				)
+	tree_clf,
+	out_file=image_path("iris_tree.dot"),
+	feature_names=iris.feature_names[2:],
+	class_names=iris.target_names,
+	rounded=True,
+	filled=True
+	)
 ```
 
 然后你可以使用`graphviz`包里的`dot`命令行工具，将 *.dot* 文件转换为 PDF 或 PNG 等多种格式。下面的命令行会将 .dot 文件转换为 .png 图像文件：
@@ -49,4 +49,11 @@ $ dot -Tpng iris_tree.dot -o iris_tree.png
 
 ## 进行预测
 
-来看看图 6-1 中的决策树是如何进行预测的。假设你发现了一朵鸢尾花，想要将它分类。你从根节点（*root node*）（深度为 0 ，在顶端）开始：该节点询问花瓣长度是否小于 2.45 厘米
+来看看图 6-1 中的决策树是如何进行预测的。假设你发现了一朵鸢尾花，想要将它分类。你从根节点（*root node*）（深度为 0 ，在顶端）开始：该节点询问花瓣长度是否小于 2.45 厘米。如果是，就移动到根的左孩子节点（深度为 1，在左边）。在本例中，它是一个叶子节点（即没有孩子节点），所以它不再继续询问：你可以直接查看该节点的预测类别，决策树预测花的类别为山鸢尾（`class=setosa`）。
+
+现在假设你发现了另一朵花，这次的花瓣长度超过了 2.45 厘米。你必须移动到根的右孩子节点（深度为 1 ，在右边），它不是叶子节点，所以它还有一次询问：花瓣宽度是否小于 1.75 厘米？如果是，那么这朵花可能是变色鸢尾（深度为 2 ，在左边）。如果不是，那么它有可能是维吉尼亚鸢尾（深度为 2 ，在右边）。真的很简单。
+
+> **笔记**
+> 决策树的众多特性之一就是它们无需太多数据预处理。特别是，它们完全不需要特征缩放或中心化。
+
+节点的`samples`属性统计它应用于多少训练实例。例如，100 个训练实例的花瓣长度都大于 2.45 厘米（深度为 1 ，在右边），其中有 54 个的花瓣宽度小于 1.75 厘米（深度为 2 ，在左边）。节点的`value`属性告诉你每个类有多少训练实例：例如，右下角的节点
