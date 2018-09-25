@@ -26,3 +26,40 @@
 
 类似地，假设你创建了一个集成，拥有 1000 个单独运行时正确率只有 51% 的分类器（只比胡乱猜测好一点）。如果你预测多数投票类，精度可能会提高到 75% ！不过，这只有当所有的分类器都完全独立、误差互不关联时才成立，显然本例中不可能实现，因为它们是在相同的数据集上训练的。它们很可能会犯同一种错，所以多数票可能会投给错误的类别，从而降低集成的精度。
 
+> **提示**
+> 集成方法在预测器彼此独立时工作得最好。一种得到多样化分类器的方法是用不同的算法训练它们。这样就增加了它们犯不同的错误的概率，提高集成的精度。
+
+下面的代码创建并训练了 Scikit-Learn 中的投票分类器，它由三个不同的分类器组成（训练集为卫星数据集，在第五章中有介绍）：
+
+```python
+from sklearn.ensemble import RandomForestClassifier
+from sklearn.ensemble import VotingClassifier
+from sklearn.linear_model import LogisticRegression
+from sklearn.svm import SVC
+log_clf	= LogisticRegression()
+rnd_clf	= RandomForestClassifier()
+svm_clf	= SVC()
+voting_clf = VotingClassifier(
+    estimators=[('lr', log_clf), ('rf', rnd_clf), ('svc', svm_clf)], voting='hard')
+voting_clf.fit(X_train,	y_train)
+```
+
+ 来看看每个分类器在测试集上的精度：
+ 
+ ```python
+>>> from sklearn.metrics import accuracy_score
+>>> for clf in (log_clf, rnd_clf, svm_clf, voting_clf):
+...	clf.fit(X_train, y_train)
+...	y_pred = clf.predict(X_test)
+...	print(clf.__class__.__name__, accuracy_score(y_test, y_pred))
+...
+LogisticRegression 0.864
+RandomForestClassifier 0.872
+SVC 0.888
+VotingClassifier 0.896
+```
+
+现在你明白了！投票分类器的表现优于所有单独的分类器。
+
+如果所有的分类器都能评估类别概率（即都有`predict_proba()`方法），你就可以让 Scikit-Learn 将类预测为概率最高的类，平均在所有单独分类器上。这被称为**软投票**（*soft voting*）。它通常能比硬投票表现得更好，因为它给予高置信投票更多的权重。你只需将`voting="hard"`换为`voting="soft"`，确保所有的分类器都能评估类别概率。这不是`SVC`类默认的选择，所以你需要把它的超参数`probability`设置为`True`（这样`SVC`类就会使用交叉验证来评估类别概率，降低训练速度，增加`predict_proba()`方法）。如果你把之前的代码改为软投票，你会发现投票分类器的精度到达了 91% ！
+
