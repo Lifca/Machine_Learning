@@ -1,4 +1,4 @@
-# 第五章 支持向量机
+# 第五章：支持向量机
 
 支持向量机（*Support Vector Machine*, SVM）是一种非常强大而多功能的机器学习模型，能实现线性和非线性分类、回归甚至异常值检测。它是机器学习中最流行的模型之一，凡是对机器学习感兴趣的人都必备的工具。 SVM 尤其适合小型或中型数据集的复杂分类问题。
 
@@ -287,7 +287,7 @@ svm_poly_reg.fit(X, y)
 >
 > 函数 ![](http://latex.codecogs.com/gif.latex?%5Cmax%280%2C1-t%29) 被称为铰链损失函数（如下）。当 ![](http://latex.codecogs.com/gif.latex?t%5Cgeq%201) 时，它等于 0 。如果 ![](http://latex.codecogs.com/gif.latex?t%3C%201) 它的导数（斜率）等于 -1 ，如果 ![](http://latex.codecogs.com/gif.latex?t%3E1) ，导数等于 0 。在 ![](http://latex.codecogs.com/gif.latex?t%3D1) 处函数不可微，不过就像 Lasso 回归，在 ![](http://latex.codecogs.com/gif.latex?t%3D1) 时（即 -1 到 0 间的任意值）你依旧可以通过次导数使用梯度下降。
 > 
-> ![hinge]()
+> ![hinge](./images/chap5/hinge.png)
 
 也可以实现在线核化 SVM ——比如，使用“[递增与递减 SVM 学习](http://isn.ucsd.edu/papers/nips00_inc.pdf)”或“[在线和主动的快速核分类器](http://www.jmlr.org/papers/volume6/bordes05a/bordes05a.pdf)”。不过，这些都是用 MATLAB 和 C++ 实现的。对于大规模的非线性问题，你可能会考虑使用神经网络（见第二部分）。
 
