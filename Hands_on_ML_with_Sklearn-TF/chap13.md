@@ -24,4 +24,16 @@ CNN 中最重要的构建模块就是卷积层（*convolutional layer*）：第�
 ![2](./images/chap13/13-2.png)
 
 > **笔记**
-> 直到现在，所有我们看到的多层神经网络都有由一长串神经元组成的层，我们不得不将输入图像压缩为一维
+> 到目前为止，所有我们看到的多层神经网络都含有由一长串神经元组成的层，所以将输入图像传递给神经网络之前，我们不得不将它们压缩到一维。现在，每一层都是二维的形式，神经元与相关输入的匹配变得更加容易。
+
+在给定的某层中，一个位于第 ![i](http://latex.codecogs.com/gif.latex?i) 行第 ![j](http://latex.codecogs.com/gif.latex?j) 列的神经元连接前一层中位于第 ![i](http://latex.codecogs.com/gif.latex?i) 行到 ![i+f_h-1](http://latex.codecogs.com/gif.latex?i&plus;f_h-1) 行、第 ![j](http://latex.codecogs.com/gif.latex?j) 列到 ![j+f_w-1](http://latex.codecogs.com/gif.latex?j&plus;f_w-1) 列的神经元的输出，其中 ![f_h](http://latex.codecogs.com/gif.latex?f_h) 和 ![f_w](http://latex.codecogs.com/gif.latex?f_w) 分别是感受野的高度和宽度（见图 13-3 ）。为了使该层的高度和宽度与前一层保持一致，通常会在输入周围添加零，如图所示。这被称为**零填充**（*zero padding*）。
+
+![3](./images/chap13/13-3.png)
+
+通过将感受野隔开，还可以将较大的输入层与较小的层相连接，如图 13-4 所示。两个连续感受野之间的距离被称为**步幅**（*stride*）。在图中，一个 5×7 的输入层（添加了零填充）与一个 3×4 的层相连接，使用了 3×3 的感受野，步幅为 2 （本例中各个方向的步幅都相同，但并不总是这样的）。上层中位于第 ![i](http://latex.codecogs.com/gif.latex?i) 行第 ![j](http://latex.codecogs.com/gif.latex?j) 列的神经元与前一层中位于第 ![i\times s_h](http://latex.codecogs.com/gif.latex?i%5Ctimes%20s_h) 行到 ![i\times s_h+f_h-1](http://latex.codecogs.com/gif.latex?i%5Ctimes%20s_h&plus;f_h-1) 行、第 ![j\times s_w+f_w-1](http://latex.codecogs.com/gif.latex?j%5Ctimes%20s_w&plus;f_w-1) 列的神经元的输出层相连接，其中 ![s_h](http://latex.codecogs.com/gif.latex?s_h) 和 ![s_w](http://latex.codecogs.com/gif.latex?s_w) 分别是垂直和水平方向上的步幅。
+
+![4](./images/chap13/13-4.png)
+
+### 过滤器
+
+神经元的权重可以表示为感受野大小的小图像。例如，图 13-5 展示了两种可能的权重集合，称为**过滤器**（*filters*）或**卷积核**（*convolution kernels*）。
