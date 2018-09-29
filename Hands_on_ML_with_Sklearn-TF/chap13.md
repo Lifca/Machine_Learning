@@ -55,4 +55,19 @@ CNN 中最重要的构建模块就是卷积层（*convolutional layer*）：第�
 
 具体地，位于卷积层 ![l](http://latex.codecogs.com/gif.latex?l) 中特征映射 ![k](http://latex.codecogs.com/gif.latex?k) 的第 ![i](http://latex.codecogs.com/gif.latex?i) 行第 ![j](http://latex.codecogs.com/gif.latex?j) 列的神经元与前一层 ![l-1](http://latex.codecogs.com/gif.latex?l-1)中位于第 ![i\times s_h](http://latex.codecogs.com/gif.latex?i%5Ctimes%20s_h) 行到 ![i\times s_h+f_h-1](http://latex.codecogs.com/gif.latex?i%5Ctimes%20s_h&plus;f_h-1) 行、第 ![j\times s_w](http://latex.codecogs.com/gif.latex?j%5Ctimes%20s_w) 列到 ![j\times s_w+f_w-1](http://latex.codecogs.com/gif.latex?j%5Ctimes%20s_w&plus;f_w-1) 列的神经元的输出相连接，遍布所有特征映射（在 ![l-1](http://latex.codecogs.com/gif.latex?l-1) 层中）。所有位于同一行同一列、但在不同的特征映射中的神经元与上一层中完全相同的神经元的输出相连接。
 
-公式 13-1 
+公式 13-1 以大型数学公式概括了之前的解释：它展示了如何计算卷积层中给定神经元的输出。因为索引不同，所以它有点儿丑，不过它所做的是计算所有输入的权重总和，加上偏差项。
+
+![z_{i,j,k}=b_k+\sum_{u=0}^{f_h-1}\sum_{v=0}^{f_w-1}\sum_{k'=0}^{f_{n'}-1}x_{i',j',k'}\cdot w_{u,v,k',k}\;\;\;\mathrm{with}\begin{cases} 
+i'=i\times s_h+u\\
+j'=j\times s_w+v
+\end{cases}](http://latex.codecogs.com/gif.latex?z_%7Bi%2Cj%2Ck%7D%3Db_k&plus;%5Csum_%7Bu%3D0%7D%5E%7Bf_h-1%7D%5Csum_%7Bv%3D0%7D%5E%7Bf_w-1%7D%5Csum_%7Bk%27%3D0%7D%5E%7Bf_%7Bn%27%7D-1%7Dx_%7Bi%27%2Cj%27%2Ck%27%7D%5Ccdot%20w_%7Bu%2Cv%2Ck%27%2Ck%7D%5C%3B%5C%3B%5C%3B%5Cmathrm%7Bwith%7D%5Cbegin%7Bcases%7D%20i%27%3Di%5Ctimes%20s_h&plus;u%5C%5C%20j%27%3Dj%5Ctimes%20s_w&plus;v%20%5Cend%7Bcases%7D)
+
+- ![z_{i,j,k}](http://latex.codecogs.com/gif.latex?z_%7Bi%2Cj%2Ck%7D) 是卷积层（ ![l](http://latex.codecogs.com/gif.latex?l) 层）特征映射 ![k](http://latex.codecogs.com/gif.latex?k) 的位于第 ![i](http://latex.codecogs.com/gif.latex?i) 行第 ![j](http://latex.codecogs.com/gif.latex?j) 列的神经元的输出。
+- ![s_h](http://latex.codecogs.com/gif.latex?s_h) 和 ![s_w](http://latex.codecogs.com/gif.latex?s_w) 分别是垂直和水平方向上的步幅， ![f_h](http://latex.codecogs.com/gif.latex?f_h) 和 ![f_w](http://latex.codecogs.com/gif.latex?f_w) 是感受野的高度和宽度， ![f_{n'}](http://latex.codecogs.com/gif.latex?f_%7Bn%27%7D) 是上一层（ ![l-1](http://latex.codecogs.com/gif.latex?l-1) 层）中特征映射的数量。
+- ![x_{i',j',k'}](http://latex.codecogs.com/gif.latex?x_%7Bi%27%2Cj%27%2Ck%27%7D) 是卷积层 ![l-1](http://latex.codecogs.com/gif.latex?l-1) 中位于第 ![i'](http://latex.codecogs.com/gif.latex?i') 行第 ![j'](http://latex.codecogs.com/gif.latex?j') 列特征映射 ![k'](http://latex.codecogs.com/gif.latex?k') 的神经元的输出。
+- ![b_k](http://latex.codecogs.com/gif.latex?b_k) 是特征映射 ![k'](http://latex.codecogs.com/gif.latex?k') （![l](http://latex.codecogs.com/gif.latex?l) 层）的偏差项。你可以把它看作是调整特征映射 ![k](http://latex.codecogs.com/gif.latex?k) 整体亮度的旋钮。
+- ![w_{u,v,k',k}](http://latex.codecogs.com/gif.latex?w_%7Bu%2Cv%2Ck%27%2Ck%7D) 是卷积层 ![l](http://latex.codecogs.com/gif.latex?l) 特征映射 ![k](http://latex.codecogs.com/gif.latex?k) 中任意两个神经元之间的连接权重，它的输入位于第 ![u](http://latex.codecogs.com/gif.latex?u) 行第 ![v](http://latex.codecogs.com/gif.latex?v) 列（相对于神经元的感受野），特征映射为 ![k'](http://latex.codecogs.com/gif.latex?k') 。
+
+### Tensorflow 实现
+
+在 Tensorflow 中，每张输入图像
