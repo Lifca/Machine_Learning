@@ -55,7 +55,7 @@ CNN 中最重要的构建模块就是卷积层（*convolutional layer*）：第�
 
 具体地，位于卷积层 ![l](http://latex.codecogs.com/gif.latex?l) 中特征映射 ![k](http://latex.codecogs.com/gif.latex?k) 的第 ![i](http://latex.codecogs.com/gif.latex?i) 行第 ![j](http://latex.codecogs.com/gif.latex?j) 列的神经元与前一层 ![l-1](http://latex.codecogs.com/gif.latex?l-1)中位于第 ![i\times s_h](http://latex.codecogs.com/gif.latex?i%5Ctimes%20s_h) 行到 ![i\times s_h+f_h-1](http://latex.codecogs.com/gif.latex?i%5Ctimes%20s_h&plus;f_h-1) 行、第 ![j\times s_w](http://latex.codecogs.com/gif.latex?j%5Ctimes%20s_w) 列到 ![j\times s_w+f_w-1](http://latex.codecogs.com/gif.latex?j%5Ctimes%20s_w&plus;f_w-1) 列的神经元的输出相连接，遍布所有特征映射（在 ![l-1](http://latex.codecogs.com/gif.latex?l-1) 层中）。所有位于同一行同一列、但在不同的特征映射中的神经元与上一层中完全相同的神经元的输出相连接。
 
-公式 13-1 以大型数学公式概括了之前的解释：它展示了如何计算卷积层中给定神经元的输出。因为索引不同，所以它有点儿丑，不过它所做的是计算所有输入的权重总和，加上偏差项。
+公式 13-1 用一个数学公式概括了之前的解释：它展示了如何计算卷积层中给定神经元的输出。因为索引不同，所以它有点儿丑，不过它所做的是计算所有输入的权重总和，加上偏差项。
 
 ![z_{i,j,k}=b_k+\sum_{u=0}^{f_h-1}\sum_{v=0}^{f_w-1}\sum_{k'=0}^{f_{n'}-1}x_{i',j',k'}\cdot w_{u,v,k',k}\;\;\;\mathrm{with}\begin{cases} 
 i'=i\times s_h+u\\
@@ -70,4 +70,46 @@ j'=j\times s_w+v
 
 ### Tensorflow 实现
 
-在 Tensorflow 中，每张输入图像
+在 Tensorflow 中，每张输入图像通常表示为 3D 张量`shape [height, width, channels]`。小批量表示为 4D 张量`shape	[mini-batch size, height, width, channels]`。卷积层的权重表示为 4D 张量 ![f_h,f_w,f_{n'},f_n](http://latex.codecogs.com/gif.latex?f_h%2Cf_w%2Cf_%7Bn%27%7D%2Cf_n) 。卷积层的偏差项简单表示为 1D 张量`shape	[fn]`。
+
+来看一个简单的例子。下面的代码使用了 Scikit-Learn 的`load_sample_images()`，加载了两张简单图像（两张彩图，一张是中国寺庙，另一张是一朵花）。之后它创建了两个 7×7 的过滤器（一个是垂直线过滤器，一个是水平线过滤器），将它们应用到两张图像上，使用一个由 Tensorflow 的`tf.nn.conv2d()`函数创建的卷积层（有零填充，步幅为 2 ）。最后，它绘制出其中一张图像的结果特征映射图（和图 13-5 右上角的图类似）。
+
+```python
+import numpy as np
+from sklearn.datasets import load_sample_images
+import numpy as np
+import tensorflow as tf
+
+# Load sample images
+china = load_sample_image("china.jpg")
+flower = load_sample_image("flower.jpg")
+dataset = np.array([china, flower], dtype=np.float32)
+batch_size, height, width, channels = dataset.shape
+
+# Create 2 filters
+filters = np.zeros(shape=(7, 7, channels, 2), dtype=np.float32)
+filters[:, 3, :, 0] = 1  # vertical line
+filters[3, :, :, 1] = 1  # horizontal line
+
+# Create a graph with input X plus a convolutional layer applying the 2 filters
+X = tf.placeholder(tf.float32, shape=(None, height, width, channels))
+convolution = tf.nn.conv2d(X, filters, strides=[1,2,2,1], padding="SAME")
+
+with tf.Session() as sess:
+    output = sess.run(convolution, feed_dict={X: dataset})
+
+plt.imshow(output[0, :, :, 1], cmap="gray") # plot 1st image's 2nd feature map
+plt.show()
+```
+大部分的代码都是一目了然的，不过`tf.nn.conv2d()`这一行需要一些解释：
+
+- `X`是输入的小批量（也是个 4D 张量，如前所述）。
+- `filters`是应用的过滤器种类（也是个 4D 张量，如前所述）。
+- `strides`是一个有四个元素的 1D 数组，中间两个元素是垂直和水平方向的步幅（ ![s_h](http://latex.codecogs.com/gif.latex?s_h) 和 ![s_w](http://latex.codecogs.com/gif.latex?s_w) ）。第一个和最后一个元素现在必须为 1 。以后可能会被用来指定批量的步幅（跳过一些实例）和频道步幅（跳过一些前一层的特征映射或频道）。
+- `padding`必须为`"VALID"`或者`"SAME"`：
+  - 如果设置为`"VALID"`，卷积层就*不*使用零填充，也许会忽视底部的一些行列，以及输入图像的右侧，取决于步幅，如图 13-7 所示（简单起见，这里只展示了水平维度，不过事实上垂直维度的逻辑应用也一样）。
+  - 如果设置为`"SAME"`，卷积层会在必要时使用零填充。本例中，输出神经元的数量等于输入神经元的数量除以步幅，向上取整（本例中， ![\mathrm{ceil}(13/5)=3](http://latex.codecogs.com/gif.latex?%5Cmathrm%7Bceil%7D%2813/5%29%3D3) ）。然后在输入周围尽可能均匀地添加零。
+
+![7](./images/chap13/13-7.png)
+
+在这个简单例子中，我们手动创建了过滤器，但是在真正的 CNN 中，你会让训练算法自动找到最优过滤器。 Tensorflow 有一个`tf.layers.conv2d()`函数，它会创建各种过滤器（称为核（*kernel*）），并随机初始化它们。例如，下面的代码会创建一个输入占位符，
