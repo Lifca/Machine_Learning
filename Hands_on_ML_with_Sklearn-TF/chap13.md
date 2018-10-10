@@ -38,13 +38,13 @@ CNN 中最重要的构建模块就是卷积层（*convolutional layer*）：第�
 
 神经元的权重可以表示为感受野大小的小图像。例如，图 13-5 展示了两种可能的权重集合，称为**过滤器**（*filters*）或**卷积核**（*convolution kernels*）。第一种表示为中央有一条垂直白线的黑色矩形（它是一个 7×7 的矩阵，除了中间一列都是 1 ，其余都是 0 ）；使用了这些权重的神经元会忽视感受野中除了中央垂直线以外的一切事物（因为所有的输入都会乘上零，除了中央垂直线的那一列）。第二种过滤器是中央有一条水平白线的黑色矩形。同样地，使用了这些权重的神经元会忽视感受野中除了中央水平线以外的一切事物。
 
-现在如果某一层中的神经元使用相同的垂直线过滤器（且具有相同的偏差项），你将图 13-5 中底部所示的输入图像传递给网络，会得到左上角的输出图像。注意，垂直白线被增强，而其余的则变模糊。类似地，右上角的图像是使用水平线过滤器的神经元得到的图像；注意，水平白线被增强，而其余的则变模糊。因此，使用同一过滤器的神经元层会给你**特征映射**（*feature map*），它会突出图像中和过滤器最相似的区域。在训练过程中， CNN 会找到对任务最有利的过滤器，它会学习将它们组合为更复杂的特征（例如，十字是图像中垂直过滤器和水平过滤器都激活的区域）。
+现在如果某一层中的神经元使用相同的垂直线过滤器（且具有相同的偏置项），你将图 13-5 中底部所示的输入图像传递给网络，会得到左上角的输出图像。注意，垂直白线被增强，而其余的则变模糊。类似地，右上角的图像是使用水平线过滤器的神经元得到的图像；注意，水平白线被增强，而其余的则变模糊。因此，使用同一过滤器的神经元层会给你**特征映射**（*feature map*），它会突出图像中和过滤器最相似的区域。在训练过程中， CNN 会找到对任务最有利的过滤器，它会学习将它们组合为更复杂的特征（例如，十字是图像中垂直过滤器和水平过滤器都激活的区域）。
 
 ![5](./images/chap13/13-5.png)
 
 ### 堆叠的多特征映射
 
-到目前为止，简单起见，我们将每个卷积层都表现为一个薄的二维层，但是实际上它是由几组规模相同的特征映射组成的，所以用三维图来表示更准确（见图 13-6 ）。在特征映射中，所有的神经元共享相同的参数（权重和偏差项），但是不同的特征映射可能有不同的参数。神经元的感受野与之前描述相同，不过它会扩展到之前所有层的特征映射上。简而言之，卷积层同时在输入中应用多个过滤器，可以在输入中的任何位置检测多种特征。
+到目前为止，简单起见，我们将每个卷积层都表现为一个薄的二维层，但是实际上它是由几组规模相同的特征映射组成的，所以用三维图来表示更准确（见图 13-6 ）。在特征映射中，所有的神经元共享相同的参数（权重和偏置项），但是不同的特征映射可能有不同的参数。神经元的感受野与之前描述相同，不过它会扩展到之前所有层的特征映射上。简而言之，卷积层同时在输入中应用多个过滤器，可以在输入中的任何位置检测多种特征。
 
 > **笔记**
 > 事实上，特征映射中所有神经元共享相同参数会大幅降低模型中的参数数量，不过最重要的是，这意味着一旦 CNN 学会了识别某个位置的特征，它就能在任何其他位置识别它。相反地，一旦常规的 DNN 学会了识别某个位置的特征，它就只能在该特定的位置识别它。
@@ -55,7 +55,7 @@ CNN 中最重要的构建模块就是卷积层（*convolutional layer*）：第�
 
 具体地，位于卷积层 ![l](http://latex.codecogs.com/gif.latex?l) 中特征映射 ![k](http://latex.codecogs.com/gif.latex?k) 的第 ![i](http://latex.codecogs.com/gif.latex?i) 行第 ![j](http://latex.codecogs.com/gif.latex?j) 列的神经元与前一层 ![l-1](http://latex.codecogs.com/gif.latex?l-1)中位于第 ![i\times s_h](http://latex.codecogs.com/gif.latex?i%5Ctimes%20s_h) 行到 ![i\times s_h+f_h-1](http://latex.codecogs.com/gif.latex?i%5Ctimes%20s_h&plus;f_h-1) 行、第 ![j\times s_w](http://latex.codecogs.com/gif.latex?j%5Ctimes%20s_w) 列到 ![j\times s_w+f_w-1](http://latex.codecogs.com/gif.latex?j%5Ctimes%20s_w&plus;f_w-1) 列的神经元的输出相连接，遍布所有特征映射（在 ![l-1](http://latex.codecogs.com/gif.latex?l-1) 层中）。所有位于同一行同一列、但在不同的特征映射中的神经元与上一层中完全相同的神经元的输出相连接。
 
-公式 13-1 用一个数学公式概括了之前的解释：它展示了如何计算卷积层中给定神经元的输出。因为索引不同，所以它有点儿丑，不过它所做的是计算所有输入的权重总和，加上偏差项。
+公式 13-1 用一个数学公式概括了之前的解释：它展示了如何计算卷积层中给定神经元的输出。因为索引不同，所以它有点儿丑，不过它所做的是计算所有输入的权重总和，加上偏置项。
 
 ![z_{i,j,k}=b_k+\sum_{u=0}^{f_h-1}\sum_{v=0}^{f_w-1}\sum_{k'=0}^{f_{n'}-1}x_{i',j',k'}\cdot w_{u,v,k',k}\;\;\;\mathrm{with}\begin{cases} 
 i'=i\times s_h+u\\
@@ -65,12 +65,12 @@ j'=j\times s_w+v
 - ![z_{i,j,k}](http://latex.codecogs.com/gif.latex?z_%7Bi%2Cj%2Ck%7D) 是卷积层（ ![l](http://latex.codecogs.com/gif.latex?l) 层）特征映射 ![k](http://latex.codecogs.com/gif.latex?k) 的位于第 ![i](http://latex.codecogs.com/gif.latex?i) 行第 ![j](http://latex.codecogs.com/gif.latex?j) 列的神经元的输出。
 - ![s_h](http://latex.codecogs.com/gif.latex?s_h) 和 ![s_w](http://latex.codecogs.com/gif.latex?s_w) 分别是垂直和水平方向上的步幅， ![f_h](http://latex.codecogs.com/gif.latex?f_h) 和 ![f_w](http://latex.codecogs.com/gif.latex?f_w) 是感受野的高度和宽度， ![f_{n'}](http://latex.codecogs.com/gif.latex?f_%7Bn%27%7D) 是上一层（ ![l-1](http://latex.codecogs.com/gif.latex?l-1) 层）中特征映射的数量。
 - ![x_{i',j',k'}](http://latex.codecogs.com/gif.latex?x_%7Bi%27%2Cj%27%2Ck%27%7D) 是卷积层 ![l-1](http://latex.codecogs.com/gif.latex?l-1) 中位于第 ![i'](http://latex.codecogs.com/gif.latex?i') 行第 ![j'](http://latex.codecogs.com/gif.latex?j') 列特征映射 ![k'](http://latex.codecogs.com/gif.latex?k') 的神经元的输出。
-- ![b_k](http://latex.codecogs.com/gif.latex?b_k) 是特征映射 ![k'](http://latex.codecogs.com/gif.latex?k') （![l](http://latex.codecogs.com/gif.latex?l) 层）的偏差项。你可以把它看作是调整特征映射 ![k](http://latex.codecogs.com/gif.latex?k) 整体亮度的旋钮。
+- ![b_k](http://latex.codecogs.com/gif.latex?b_k) 是特征映射 ![k'](http://latex.codecogs.com/gif.latex?k') （![l](http://latex.codecogs.com/gif.latex?l) 层）的偏置项。你可以把它看作是调整特征映射 ![k](http://latex.codecogs.com/gif.latex?k) 整体亮度的旋钮。
 - ![w_{u,v,k',k}](http://latex.codecogs.com/gif.latex?w_%7Bu%2Cv%2Ck%27%2Ck%7D) 是卷积层 ![l](http://latex.codecogs.com/gif.latex?l) 特征映射 ![k](http://latex.codecogs.com/gif.latex?k) 中任意两个神经元之间的连接权重，它的输入位于第 ![u](http://latex.codecogs.com/gif.latex?u) 行第 ![v](http://latex.codecogs.com/gif.latex?v) 列（相对于神经元的感受野），特征映射为 ![k'](http://latex.codecogs.com/gif.latex?k') 。
 
 ### Tensorflow 实现
 
-在 Tensorflow 中，每张输入图像通常表示为 3D 张量`shape [height, width, channels]`。小批量表示为 4D 张量`shape	[mini-batch size, height, width, channels]`。卷积层的权重表示为 4D 张量 ![f_h,f_w,f_{n'},f_n](http://latex.codecogs.com/gif.latex?f_h%2Cf_w%2Cf_%7Bn%27%7D%2Cf_n) 。卷积层的偏差项简单表示为 1D 张量`shape	[fn]`。
+在 Tensorflow 中，每张输入图像通常表示为 3D 张量`shape [height, width, channels]`。小批量表示为 4D 张量`shape	[mini-batch size, height, width, channels]`。卷积层的权重表示为 4D 张量 ![f_h,f_w,f_{n'},f_n](http://latex.codecogs.com/gif.latex?f_h%2Cf_w%2Cf_%7Bn%27%7D%2Cf_n) 。卷积层的偏置项简单表示为 1D 张量`shape	[fn]`。
 
 来看一个简单的例子。下面的代码使用了 Scikit-Learn 的`load_sample_images()`，加载了两张简单图像（两张彩图，一张是中国寺庙，另一张是一朵花）。之后它创建了两个 7×7 的过滤器（一个是垂直线过滤器，一个是水平线过滤器），将它们应用到两张图像上，使用一个由 Tensorflow 的`tf.nn.conv2d()`函数创建的卷积层（有零填充，步幅为 2 ）。最后，它绘制出其中一张图像的结果特征映射图（和图 13-5 右上角的图类似）。
 
@@ -126,7 +126,7 @@ conv = tf.layers.conv2d(X, filters=2, kernel_size=7, strides=[2,2], padding="SAM
 
 CNN 的另一个问题是卷积层需要大量的 RAM ，尤其是在训练的时候，因为反向传播的反向传递需要正向传播中所有计算的中间值。
 
-例如，考虑这样一个卷积层，有 5×5 的过滤器，输出 200 个规模为 150×100 的特征映射，步幅为 1 ，填充为`SAME`。如果输入是一张 150×150 的 RGB 图像（有三个通道），那么参数的数量就是 ![(5\times5\times3+1)\times200 =15,200](http://latex.codecogs.com/gif.latex?%285%5Ctimes5%5Ctimes3&plus;1%29%5Ctimes200%20%3D15%2C200) （ +1 对应偏差项），和整个全连接层相比还是很小的数量。然而，200 个特征映射每个都包含 150×100 个神经元，每个神经元都需要计算 ![5\times5\times3=75](http://latex.codecogs.com/gif.latex?5%5Ctimes5%5Ctimes3%3D75) 个输入的权重总和：总计就是 2.25 亿的浮点乘法运算。虽然不像全连接层那么糟糕，但是计算仍然很复杂。此外，如果特征映射是用 32 位浮点数表示的，那么卷积层的输出会占据 RAM 的 ![200\times150\times100\times32=96](http://latex.codecogs.com/gif.latex?200%5Ctimes150%5Ctimes100%5Ctimes32%3D96)  百万位（大约 11.4 MB ）。这只是一个实例！如果一个训练批量包含 100 个实例，那么该层会占用超过 1G 的 RAM ！
+例如，考虑这样一个卷积层，有 5×5 的过滤器，输出 200 个规模为 150×100 的特征映射，步幅为 1 ，填充为`SAME`。如果输入是一张 150×150 的 RGB 图像（有三个通道），那么参数的数量就是 ![(5\times5\times3+1)\times200 =15,200](http://latex.codecogs.com/gif.latex?%285%5Ctimes5%5Ctimes3&plus;1%29%5Ctimes200%20%3D15%2C200) （ +1 对应偏置项），和整个全连接层相比还是很小的数量。然而，200 个特征映射每个都包含 150×100 个神经元，每个神经元都需要计算 ![5\times5\times3=75](http://latex.codecogs.com/gif.latex?5%5Ctimes5%5Ctimes3%3D75) 个输入的权重总和：总计就是 2.25 亿的浮点乘法运算。虽然不像全连接层那么糟糕，但是计算仍然很复杂。此外，如果特征映射是用 32 位浮点数表示的，那么卷积层的输出会占据 RAM 的 ![200\times150\times100\times32=96](http://latex.codecogs.com/gif.latex?200%5Ctimes150%5Ctimes100%5Ctimes32%3D96)  百万位（大约 11.4 MB ）。这只是一个实例！如果一个训练批量包含 100 个实例，那么该层会占用超过 1G 的 RAM ！
 
 在推断（即对一个新的实例做出预测）中，一旦下一层的计算完成，被该层占用的 RAM 就会被释放，所以你只需要两个连续层所需的 RAM 。不过在训练期间，正向传播中计算的一切数据都需要被保留用于反向传递，所以所需 RAM 的数量（至少）为所有层所需 RAM 的总量。
 
@@ -193,11 +193,11 @@ LeNet-5 架构可能是最著名的 CNN 架构。之前提到过，它是由 Yan
 有一些额外的需要注意：
 
 - MNIST 的图像是 28×28 像素，不过在传递给网络之前会被零填充扩展到 32×32 像素，并进行归一化。剩下的网络不使用任何填充，所以图像在网络中进展时大小一直在缩小。
-- 平均池化层比往常要稍微复杂一些：每个神经元计算输入的平均值，再乘上一个学习系数（每个映射都有一个），再加上一个学习偏差项（也是每个映射都有一个），最后再应用于激励函数。
+- 平均池化层比往常要稍微复杂一些：每个神经元计算输入的平均值，再乘上一个学习系数（每个映射都有一个），再加上一个学习偏置项（也是每个映射都有一个），最后再应用于激励函数。
 - C3 映射中大部分神经元只与三个或四个 S2 映射的神经元相连接（而不是六个）。详见原始论文中的表 1 。 
 - 输出层有点特殊：每个神经元并不计算输入的点积和权重向量，而是输出它们输入向量与权重向量之间欧氏距离的平方。每个输出测量图像属于某一特定数字类别的程度。交叉验证损失函数现在是首选，因为它能更多地惩罚错误的预测，生成更大的梯度，也收敛得更快。
 
-Yann LeCun 的[网站](http://yann.lecun.com/)（ “LENET” 部分）展示了 LeNet-5 分类数字的优秀 demo 。
+Yann LeCun 的 [网站](http://yann.lecun.com/) （ “LENET” 部分）展示了 LeNet-5 分类数字的优秀 demo 。
 
 ### AlexNet
 
@@ -207,4 +207,21 @@ Yann LeCun 的[网站](http://yann.lecun.com/)（ “LENET” 部分）展示了
 
 为了减少过拟合，作者使用了两种我们先前讨论过的正则技术：首先在训练期间将丢失率（ 50% 的丢失率）应用于 F8 和 F9 的输出。其次，他们通过随机对图像进行各种偏移，水平翻转和改变光照条件，实现了数据增强。
 
-AlexNet 也使用了
+AlexNet 也在 C1 层和 C3 层的 ReLU 之后立即使用竞争标准化步骤，被称为**局部响应标准化**（*local response normalization*）。这种标准化的形式使最强激活的神经元抑制同一位置上但特征映射相邻的神经元（这种竞争激活在生物神经元中已被观测到）。这就鼓励了特化不同的特征映射，强制它们分开，并让它们探索范围更广的特征，最终提高泛化能力。公式 13-2 展示了 LRN 的应用方法。
+
+![b_i=a_i(k+\alpha\sum_{j=j_{\mathrm{low}}}^{j_{\mathrm{high}}}a_j^2)^{-\beta}\;\;\; \mathrm{with}\begin{cases} j_\mathrm{high}=\min(i+\frac{r}{2},f_n-1)\\ j_\mathrm{low}=\max(0,i-\frac{r}{2}) \end{cases}](http://latex.codecogs.com/gif.latex?b_i%3Da_i%28k&plus;%5Calpha%5Csum_%7Bj%3Dj_%7B%5Cmathrm%7Blow%7D%7D%7D%5E%7Bj_%7B%5Cmathrm%7Bhigh%7D%7D%7Da_j%5E2%29%5E%7B-%5Cbeta%7D%5C%3B%5C%3B%5C%3B%20%5Cmathrm%7Bwith%7D%5Cbegin%7Bcases%7D%20j_%5Cmathrm%7Bhigh%7D%3D%5Cmin%28i&plus;%5Cfrac%7Br%7D%7B2%7D%2Cf_n-1%29%5C%5C%20j_%5Cmathrm%7Blow%7D%3D%5Cmax%280%2Ci-%5Cfrac%7Br%7D%7B2%7D%29%20%5Cend%7Bcases%7D)
+
+- ![b_i](http://latex.codecogs.com/gif.latex?b_i) 是位于某行 ![u](http://latex.codecogs.com/gif.latex?u) 某列 ![v](http://latex.codecogs.com/gif.latex?v) 、特征映射 ![i](http://latex.codecogs.com/gif.latex?i) 的神经元的标准化输出（注意在该公式中我们只考虑在该行该列的神经元，所以 ![u](http://latex.codecogs.com/gif.latex?u) 和 ![v](http://latex.codecogs.com/gif.latex?v) 不显示）。
+- ![a_i](http://latex.codecogs.com/gif.latex?a_i) 是在 ReLU 步骤之后、标准化之前的神经元的激励。
+- ![k,\alpha,\beta,r](http://latex.codecogs.com/gif.latex?k%2C%5Calpha%2C%5Cbeta%2Cr) 是超参数。 ![k](http://latex.codecogs.com/gif.latex?k) 被称为偏置项， ![r](http://latex.codecogs.com/gif.latex?r) 被称为深度半径。
+- ![f_n](http://latex.codecogs.com/gif.latex?f_n) 是特征映射的数量。
+
+例如，如果 ![r=2](http://latex.codecogs.com/gif.latex?r%3D2) ，且神经元有很强的激励，那么它会抑制在它上下的特征映射的神经元的激活。
+
+在 AlexNet 中，超参数如下设置： ![r=2,\alpha=0.00002,\beta=0.75,k=1](http://latex.codecogs.com/gif.latex?r%3D2%2C%5Calpha%3D0.00002%2C%5Cbeta%3D0.75%2Ck%3D1) 。这一步可以通过 Tensorflow 的`tf.nn.local_response_normalization()`操作来实现。
+
+AlexNet 的一种变种称为 *ZF	Net* 由 Matthew Zeiler 和 Rob Fergus 开发，获得了 2013 年 ILSVRC 挑战的胜利。它本质上是超参数（特征映射的数量、核的大小、步幅等等）经过微调的 AlexNet 。
+
+### GoogLeNet
+
+[GoogLeNet 架构](http://www.cs.unc.edu/~wliu/papers/GoogLeNet.pdf) 由 Google Research 的 Christian Szegedy 等人开发的，它获得了 2014 年 ILSVRC 挑战的胜利，使 top-5 错误率降到了 7% 。它优秀的表现很大程度上是因为
