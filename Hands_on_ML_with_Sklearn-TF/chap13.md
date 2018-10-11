@@ -224,4 +224,12 @@ AlexNet 的一种变种称为 *ZF	Net* 由 Matthew Zeiler 和 Rob Fergus 开发�
 
 ### GoogLeNet
 
-[GoogLeNet 架构](http://www.cs.unc.edu/~wliu/papers/GoogLeNet.pdf) 由 Google Research 的 Christian Szegedy 等人开发的，它获得了 2014 年 ILSVRC 挑战的胜利，使 top-5 错误率降到了 7% 。它优秀的表现很大程度上是因为
+[GoogLeNet 架构](http://www.cs.unc.edu/~wliu/papers/GoogLeNet.pdf) 由 Google Research 的 Christian Szegedy 等人开发的，它获得了 2014 年 ILSVRC 挑战的胜利，使 top-5 错误率降到了低于 7% 。它优秀的表现很大程度上是因为网络比先前的 CNN 都要深得多（见图 13-11 ）。这是通过被称为**起始模块**（*inception modules*）的子网络实现的，它允许 GoogLeNet 使用比之前的架构更高效的参数：事实上 GoogLeNet 比 AlexNet 少了十倍的参数（ AlexNet 大约 6000 万， GoogLeNet 大约 600 万）。
+
+图 13-10 展示了一个起始模块的架构。“3 × 3 + 2(S)”的记号代表该层使用了 3 × 3 的核，步幅为 2 ，填充为 SAME 。输入信号首先被复制传递到四种不同的层。所有的卷积层都使用了 ReLU 激励函数。注意第二组卷积层使用了不同的核大小（ 1 × 1 ，3 × 3 和 5 × 5 ），允许它们在不同的比例下获取图案。另外也要注意，每个独立的层都使用了步幅为 1 的零填充（即便是最大池化层），所以它们的输出都有和输入一样的高度和宽度。这样就可以在最后的深度连接层（*depth concat layer*）上沿着深度维度连接所有的输出（即从四个顶部卷积层将所有的特征映射堆叠起来）。这个连接层可以通过 Tensorflow 的`tf.concat()`操作，设置`axis=3`（ axis 3 是深度）来实现。
+
+![10](./images/chap13/13-10.png)
+
+你也许想知道为什么起始模块有一个 1 × 1 核的卷积层。当然这些层不能获取任何特征，因为它们一次只看一个像素？事实上，这些层为以下两个目的服务：
+
+- 首先，它们被设置为输出比输入少得多的特征映射，所以它们作为**瓶颈层**（*bottleneck layers*），意味着
