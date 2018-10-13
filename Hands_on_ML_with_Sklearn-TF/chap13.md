@@ -293,9 +293,34 @@ ResNet-34 是有 34 层（只算卷积层和全连接层）的 ResNet ，包含 
 > **Tensorflow 卷积操作**
 >
 > Tensorflow 也提供了一系列的卷积层：
-> - tf.layers.conv1d() 创造一个 1D 输入的卷积层。它在自然语言处理方面很有用，一个句子可以用一维单词数组来表示，感受野覆盖了一些邻近的单词。
-> - tf.layers.conv3d() 创造一个 3D 输入的卷积层，比如 3D PET 扫描。
-> - tf.nn.atrous_conv2d() 创造一个 **atrous 卷积层**（ “à trous” 是 “with holes” 的法语）。这相当于使用一个常规卷积层，带有通过插入零的行列扩张的过滤器（即，孔）。例如，一个 1 × 3 的过滤器 [[1,2,3]] 能够以 4 的扩张率进行扩张，生成扩张过滤器（*dilated filter*）[[1, 0, 0, 0, 2, 0, 0, 0, 3]]。这就允许卷积层有更大的感受野，而无需任何计算代价或额外参数。
-> - tf.layers.conv2d_transpose() 创造一个**转置卷积层**（*transpose convolutional layer*），有时也称为**反卷积层**（*deconvolutional layer*），它能上采样（*upsample*）图像。它通过在输入间插入零来进行上采样，所以你可以将其看做一个使用了分数步幅的常规卷积层。上采样在图像分割方面很有用：在典型的 CNN 中，当逐渐通过网络时，特征映射会越来越小，所以如果
-> - tf.nn.depthwise_conv2d()
-> - tf.layers.separable_conv2d()
+> - `tf.layers.conv1d()`创建一个 1D 输入的卷积层。它在自然语言处理方面很有用，一个句子可以用一维单词数组来表示，感受野覆盖了一些邻近的单词。
+> - `tf.layers.conv3d()`创建一个 3D 输入的卷积层，比如 3D PET 扫描。
+> - `tf.nn.atrous_conv2d()`创建一个 **atrous 卷积层**（ “à trous” 是 “with holes” 的法语）。这相当于使用一个常规卷积层，带有通过插入零的行列扩张的过滤器（即，孔）。例如，一个 1 × 3 的过滤器 [[1,2,3]] 能够以 4 的扩张率进行扩张，生成扩张过滤器（*dilated filter*）[[1, 0, 0, 0, 2, 0, 0, 0, 3]]。这就允许卷积层有更大的感受野，而无需任何计算代价或额外参数。
+> - `tf.layers.conv2d_transpose()` 创建一个**转置卷积层**（*transpose convolutional layer*），有时也称为**反卷积层**（*deconvolutional layer*），它能上采样（*upsample*）图像。它通过在输入间插入零来进行上采样，所以你可以将其看做一个使用了分数步幅的常规卷积层。上采样在图像分割方面很有用：在典型的 CNN 中，当逐渐通过网络时，特征映射会越来越小，所以如果你想输出和输入大小相同的图像，你需要一个上采样层。
+> - `tf.nn.depthwise_conv2d()` 创建一个**深度卷积层**（*depthwise convolutional layer*），将每个过滤器独立应用于每个单一输入频道。因此，如果有 ![f_n](http://latex.codecogs.com/gif.latex?f_n) 个过滤器和 ![f_{n'}](http://latex.codecogs.com/gif.latex?f_%7Bn%27%7D) 个输入频道，那么会输出 ![f_n\times f_{n'}](http://latex.codecogs.com/gif.latex?f_n%5Ctimes%20f_%7Bn%27%7D) 个特征映射。
+> - `tf.layers.separable_conv2d()` 创建一个**可分卷积层**（*separable convolutional layer*），首先像深度卷积层一样运作，然后在生成的特征映射上应用 1 × 1 的卷积层。这样就可以把过滤器应用到任意的输入频道。
+
+## 练习
+
+1. 在图像分类上， CNN 与 全连接 DNN 相比有何优势？
+2. 考虑一个由三个卷积层组成的 CNN ，
+3. 如果你的 GPU 在训练 CNN 时耗尽了内存，为了解决问题你可以尝试哪五种方法？
+4. 为什么你更愿意增加一个最大池化层，而不是相同步幅的卷积层？
+5. 你何时想要增加局部相应标准化层？
+6. 你能说出相比于 LeNet-5 ， AlexNet 的主要创新吗？ GoogLeNet 和 ResNet 的主要创新呢？
+7. 建立你自己的 CNN ，试着在 MNIST 上取得最高的准确率。
+8. 使用 Inception	v3 分类大型图像：
+  - 下载许多动物的图像。用 Python 加载，比如用`matplotlib.image.mpimg.imread()`函数或`scipy.misc.imread()`函数。将它们重塑为 299 × 299 像素，确保它们只有三个频道（ RGB ），没有透明度这一频道。
+  - 下载最新的预训练 Inception v3 模型：可查阅 [https://arxiv.org/pdf/1512.00567v1.pdf](https://arxiv.org/pdf/1512.00567v1.pdf) 。
+  - 调用`inception_v3()`函数创建 Inception v3 模型，如下所示。
+  ```python
+  	from tensorflow.contrib.slim.nets import inception
+	import tensorflow.contrib.slim	as slim
+	
+	X = tf.placeholder(tf.float32, shape=[None, 299, 299, 3], name="X")
+	with slim.arg_scope(inception.inception_v3_arg_scope()):
+		logits,	end_points = inception.inception_v3(
+			X,	num_classes=1001,	is_training=False)
+	predictions = end_points["Predictions"]
+	saver = tf.train.Saver()
+  ```
