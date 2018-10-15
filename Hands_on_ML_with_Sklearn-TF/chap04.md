@@ -447,14 +447,14 @@ plot_learning_curves(polynomial_regression, X, y)
 
 ![](http://latex.codecogs.com/gif.latex?J%28%5Ctheta%29%3D%5Cmathrm%7BMSE%7D%28%5Ctheta%29&plus;%5Calpha%5Cfrac%7B1%7D%7B2%7D%5Csum_%7Bi%3D1%7D%5E%7Bn%7D%5Ctheta_i%5E2)
 
-注意，偏差项 ![](http://latex.codecogs.com/gif.latex?\theta_0) 并没有被正则化（累加是从 ![](http://latex.codecogs.com/gif.latex?i=1) 开始的，而不是 ![](http://latex.codecogs.com/gif.latex?0) ）。如果我们定义 ![](http://latex.codecogs.com/gif.latex?%5Cmathbf%7Bw%7D) 作为特征权重（ ![](http://latex.codecogs.com/gif.latex?\theta_1) 到 ![](http://latex.codecogs.com/gif.latex?\theta_n) ）的向量，那么正规项就等于 ![](http://latex.codecogs.com/gif.latex?%5Cfrac%7B1%7D%7B2%7D%28%5Cparallel%5Cmathbf%7Bw%7D%5Cparallel_2%29%5E2) ，其中 ![](http://latex.codecogs.com/gif.latex?%5Cparallel%5Ccdot%5Cparallel_2) 表示权重向量的 ![](http://latex.codecogs.com/gif.latex?\ell_2) 范数。对于梯度下降，只要在均方差梯度向量中增加 ![](http://latex.codecogs.com/gif.latex?%5Calpha%5Cmathbf%7Bw%7D) 。
+注意，偏置项 ![](http://latex.codecogs.com/gif.latex?\theta_0) 并没有被正则化（累加是从 ![](http://latex.codecogs.com/gif.latex?i=1) 开始的，而不是 ![](http://latex.codecogs.com/gif.latex?0) ）。如果我们定义 ![](http://latex.codecogs.com/gif.latex?%5Cmathbf%7Bw%7D) 作为特征权重（ ![](http://latex.codecogs.com/gif.latex?\theta_1) 到 ![](http://latex.codecogs.com/gif.latex?\theta_n) ）的向量，那么正规项就等于 ![](http://latex.codecogs.com/gif.latex?%5Cfrac%7B1%7D%7B2%7D%28%5Cparallel%5Cmathbf%7Bw%7D%5Cparallel_2%29%5E2) ，其中 ![](http://latex.codecogs.com/gif.latex?%5Cparallel%5Ccdot%5Cparallel_2) 表示权重向量的 ![](http://latex.codecogs.com/gif.latex?\ell_2) 范数。对于梯度下降，只要在均方差梯度向量中增加 ![](http://latex.codecogs.com/gif.latex?%5Calpha%5Cmathbf%7Bw%7D) 。
 
 > **警告**
 > 使用岭回归前，对数据进行缩放（比如，使用`StandardScaler`）是很重要的，因为它对输入特征的尺度很敏感。大多数正则化模型都是如此。
 
 图4-17展示了一些在相同的线性数据上使用不同 ![](http://latex.codecogs.com/gif.latex?\alpha) 值的岭回归模型。左图是普通的岭回归模型，得到线性预测结果。右图中，数据首先使用`PolynomialFeatures(degree=10)`进行扩展，然后使用`StandardScaler`进行数据缩放，最后再应用岭回归模型：这就是带有岭正则的多项式回归。注意 ![](http://latex.codecogs.com/gif.latex?\alpha) 增大时，预测曲线会变得平坦（即，更不极端，更合理），这样减少了偏差，但增加了方差。
 
-对于线性回归，我们可以通过计算闭式解方程或者使用梯度下降来应用岭回归。优缺点是相同的。公式4-9展示了闭式解（矩阵 ![](http://latex.codecogs.com/gif.latex?%5Cmathbf%7BA%7D) 是除了左上角有个 0 的 ![](http://latex.codecogs.com/gif.latex?n%5Ctimes%20n) 单位矩阵（*identity matrix*），那个 0 对应偏差项）。
+对于线性回归，我们可以通过计算闭式解方程或者使用梯度下降来应用岭回归。优缺点是相同的。公式4-9展示了闭式解（矩阵 ![](http://latex.codecogs.com/gif.latex?%5Cmathbf%7BA%7D) 是除了左上角有个 0 的 ![](http://latex.codecogs.com/gif.latex?n%5Ctimes%20n) 单位矩阵（*identity matrix*），那个 0 对应偏置项）。
 
 ![17](./images/chap4/4-17.png)
 
@@ -568,7 +568,7 @@ for epoch in range(1000):
 
 ### 概率估计
 
-所以它是怎么运作的？就像线性回归模型一样，逻辑回归模型计算输入特征的权重总和（加上偏差项），不过不像线性回归模型那样直接输出结果，它输出结果的逻辑函数值（*logistic*）（见公式4-13）。
+所以它是怎么运作的？就像线性回归模型一样，逻辑回归模型计算输入特征的权重总和（加上偏置项），不过不像线性回归模型那样直接输出结果，它输出结果的逻辑函数值（*logistic*）（见公式4-13）。
 
 ![](http://latex.codecogs.com/gif.latex?%5Chat%20p%3Dh_%7B%5Ctheta%7D%28%5Cmathbf%7Bx%7D%29%3D%5Csigma%28%5Ctheta%5ET%20%5Ccdot%20%5Cmathbf%7Bx%7D%29)
 
