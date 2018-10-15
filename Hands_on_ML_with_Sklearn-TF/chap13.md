@@ -319,10 +319,10 @@ ResNet-34 是有 34 层（只算卷积层和全连接层）的 ResNet ，包含 
   
   X = tf.placeholder(tf.float32, shape=[None, 299, 299, 3], name="X")
   with slim.arg_scope(inception.inception_v3_arg_scope()):
-  	logits, end_points = inception.inception_v3(
-		X, num_classes=1001, is_training=False)
-	predictions = end_points["Predictions"]
-	saver = tf.train.Saver()
+      logits, end_points = inception.inception_v3(
+	      X, num_classes=1001, is_training=False)
+  predictions = end_points["Predictions"]
+  saver = tf.train.Saver()
   ```
   - 使用`Saver`打开一个新的会话，恢复你之前下载的已训练的模型检查点。
   - 运行模型来对你准备的图像进行分类。每张图片展示前五种预测，以及估计概率（类名的列表可查阅： [https://goo.gl/brXRtZ](https://goo.gl/brXRtZ) ）。 模型的准确率如何？
