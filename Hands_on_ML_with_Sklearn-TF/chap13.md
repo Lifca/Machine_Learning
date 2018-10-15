@@ -188,7 +188,7 @@ plt.show()
 
 LeNet-5 架构可能是最著名的 CNN 架构。之前提到过，它是由 Yann	LeCun 在 1998 年创造的，被广泛用于手写数字识别（ MNIST ）。它由表 13-1 所示的层组成。
 
-![lenet5](./images/chap13/13-lenet5.png)
+![lenet5](./images/chap13/lenet5.png)
 
 有一些额外的需要注意：
 
@@ -203,7 +203,7 @@ Yann LeCun 的 [网站](http://yann.lecun.com/) （ “LENET” 部分）展示�
 
 [AlexNet CNN 架构](http://papers.nips.cc/paper/4824-imagenet-classification-with-deep-convolutional-neural-networks.pdf) 以巨大的优势赢得了 2012 年的 ImageNet ILSVRC 挑战赛：它达到了 17% 的 top-5 错误率，而第二名只有 26% ！它由 Alex Krizhevsky（也是它名字的由来）、 Ilya Sutskever 、 Geoffrey Hinton 开发。它和 LeNet-5 很相似，只是更大且更深，也是第一个直接将卷积层堆叠在一起的，而不是在卷积层上堆叠一个池化层。表 13-2 展示了该架构。
 
-![alexnet](./images/chap13/13-alexnet.png)
+![alexnet](./images/chap13/alexnet.png)
 
 为了减少过拟合，作者使用了两种我们先前讨论过的正则技术：首先在训练期间将丢失率（ 50% 的丢失率）应用于 F8 和 F9 的输出。其次，他们通过随机对图像进行各种偏移，水平翻转和改变光照条件，实现了数据增强。
 
@@ -220,7 +220,7 @@ AlexNet 也在 C1 层和 C3 层的 ReLU 之后立即使用竞争标准化步骤�
 
 在 AlexNet 中，超参数如下设置： ![r=2,\alpha=0.00002,\beta=0.75,k=1](http://latex.codecogs.com/gif.latex?r%3D2%2C%5Calpha%3D0.00002%2C%5Cbeta%3D0.75%2Ck%3D1) 。这一步可以通过 Tensorflow 的`tf.nn.local_response_normalization()`操作来实现。
 
-AlexNet 的一种变种称为 *ZF	Net* 由 Matthew Zeiler 和 Rob Fergus 开发，获得了 2013 年 ILSVRC 挑战赛的胜利。它本质上是超参数（特征映射的数量、核的大小、步幅等等）经过微调的 AlexNet 。
+AlexNet 的一种变种称为 *ZF Net* 由 Matthew Zeiler 和 Rob Fergus 开发，获得了 2013 年 ILSVRC 挑战赛的胜利。它本质上是超参数（特征映射的数量、核的大小、步幅等等）经过微调的 AlexNet 。
 
 ### GoogLeNet
 
@@ -311,16 +311,21 @@ ResNet-34 是有 34 层（只算卷积层和全连接层）的 ResNet ，包含 
 7. 建立你自己的 CNN ，试着在 MNIST 上取得最高的准确率。
 8. 使用 Inception	v3 分类大型图像：
   - 下载许多动物的图像。用 Python 加载，比如用`matplotlib.image.mpimg.imread()`函数或`scipy.misc.imread()`函数。将它们重塑为 299 × 299 像素，确保它们只有三个频道（ RGB ），没有透明度这一频道。
-  - 下载最新的预训练 Inception v3 模型：可查阅 [https://arxiv.org/pdf/1512.00567v1.pdf](https://arxiv.org/pdf/1512.00567v1.pdf) 。
+  - 下载最新的预训练 Inception v3 模型：检查点可查阅 [https://arxiv.org/pdf/1512.00567v1.pdf](https://arxiv.org/pdf/1512.00567v1.pdf) 。
   - 调用`inception_v3()`函数创建 Inception v3 模型，如下所示。
   ```python
-  	from tensorflow.contrib.slim.nets import inception
-	import tensorflow.contrib.slim	as slim
-	
-	X = tf.placeholder(tf.float32, shape=[None, 299, 299, 3], name="X")
-	with slim.arg_scope(inception.inception_v3_arg_scope()):
-		logits,	end_points = inception.inception_v3(
-			X,	num_classes=1001,	is_training=False)
+  from tensorflow.contrib.slim.nets import inception
+  import tensorflow.contrib.slim as slim
+  
+  X = tf.placeholder(tf.float32, shape=[None, 299, 299, 3], name="X")
+  with slim.arg_scope(inception.inception_v3_arg_scope()):
+  	logits,	end_points = inception.inception_v3(
+		X, num_classes=1001, is_training=False)
 	predictions = end_points["Predictions"]
 	saver = tf.train.Saver()
   ```
+  - 使用`Saver`打开一个新的会话，恢复你之前下载的已训练的模型检查点。
+  - 运行模型来对你准备的图像进行分类。每张图片展示前五种预测，以及估计概率（类名的列表可查阅： [https://goo.gl/brXRtZ](https://goo.gl/brXRtZ) ）。 模型的准确率如何？
+9. 用于大型图像分类的迁移学习。
+  - 创建每个类至少包含 1000 张图像的训练集。例如，你可以分类自己在不同地方的照片（沙滩、山顶、城市，等等），或使用现成的数据集，比如 [花卉数据集](https://goo.gl/EgJVXZ) 或 MIT 的 [地点数据集](http://places.csail.mit.edu/) （需要注册，且数据集很大）。
+  - 
