@@ -61,4 +61,89 @@ y = tf.Variable(4, name="y")
 f = x*x*y + y + 2
 ```
 
-这样就完成了！要理解的最重要的事是代码
+这样就完成了！要理解的最重要的事是代码并不执行任何计算，即使它看起来做了（尤其是最后一行）。它只创建了一个计算图。事实上，甚至连变量都没有初始化。为了对图求值，你需要打开一个 Tensorflow 的会话（*session*），并用它初始化变量和求`f`值。 Tensorflow 的会话负责处理在 CPU 或 GPU 设备上的操作并运行它们，它会保留所有的变量值。下面的代码会创建一个会话，初始化变量，求出`f`的值，之后关闭会话（释放资源）。
+
+```python
+>>> sess = tf.Session()
+>>> sess.run(x.initializer)
+>>> sess.run(y.initializer)
+>>> result = sess.run(f)
+>>> print(result)
+42
+>>> sess.close()
+```
+
+每次都不得不重复`sess.run()`有点麻烦，不过幸运的是有更好的方法：
+
+```python
+with tf.Session() as sess:
+	x.initializer.run()
+	y.initializer.run()
+	result = f.eval()
+```
+
+在`with`块代码中，会话被设置为默认会话。调用`x.initializer.run()`和调用`tf.get_default_session().run(x.initializer)`是等效的，类似地，调用`f.eval()`和调用`tf.get_default_session().run(f)`也是等效的。这样就增加了代码的可读性。此外，会话会在块代码的最后自动关闭。
+
+你可以使用`global_variables_initializer()`函数，无需手动初始化每个单独变量。注意，它并不会立即执行初始化，而是在图中创建一个节点，它在运行时会初始化所有变量：
+
+```python
+init = tf.global_variables_initializer()  # 准备初始化节点
+with tf.Session() as sess:
+	init.run()	# 事实上初始化了所有变量
+	result = f.eval()
+```
+
+在 Jupyter 或者 Python Shell 中，你可能会偏于创建一个`InteractiveSession`。它与常规`Session`的唯一区别是当`InteractiveSession`被创建时，它会自动被设为默认会话，所以你不需要再写一个`with`块了（但是当你完事后，你需要手动关闭会话）。
+
+```python
+>>> sess = tf.InteractiveSession()
+>>> init.run()
+>>> result = f.eval()
+>>> print(result)
+42
+>>> sess.close()
+```
+
+一个 Tensorflow 程序通常被分为两部分：第一部分会构建一个计算图（被称为构造阶段（*construction phase*）），第二部分会运行它（这是执行阶段（*execution phase*））。构造阶段通常建立计算图，代表机器学习模型以及所需用于训练的计算。执行阶段通常进行循环，重复对训练步骤求值（例如，每步一个小批量），逐渐改善模型的参数。我们稍后会有一个样例。
+
+## 管理图
+
+任何你所创建的节点都会被自动加入默认图中：
+
+```python
+>>> x1 = tf.Variable(1)
+>>> x1.graph is tf.get_default_graph()
+True
+```
+
+大多数情况下它运行没问题，但是有时你也许想要管理多个独立图。你可以创建新的`Graph`，暂时在`with`块中将它设为默认图，像这样：
+
+```python
+>>> graph = tf.Graph()
+>>> with graph.as_default():
+...     x2 = tf.Variable(2)
+...
+>>> x2.graph is graph
+True
+>>> x2.graph is tf.get_default_graph()
+False
+```
+
+> **提示**
+> 在 Jupyter （或 Python Shell ）中，在实验时通常会多次运行同一个命令。因此，你可能会得到有许多重复节点的默认图。一种解决方法是重启 Jupyter 内核（或 Python Shell ），不过更便捷的方法是运行`tf.reset_default_graph()`，重置默认图。
+
+## 节点值的生命周期
+
+当你求一个节点的值时， Tensorflow 会自动确定依赖的节点集，并优先求出这些节点的值。例如，考虑下面的代码：
+
+```python
+w = tf.constant(3)
+x = w + 2
+y = x + 5
+z = x * 3
+with tf.Session() as sess:
+	print(y.eval())	  # 10
+	print(z.eval())	  # 15
+```
+
+首先，代码定义了一个非常简单的图。之后它启动了会话，运行图来对`y`求值： Tensorflow 自动检测到`y`依赖于`x`，而`x`依赖于`w`，所以它会优先计算`w`，然后是`x`，再是`y`，之后返回`y`的值。最后，代码运行图来求`z`的值。再次强调， Tensorflow 检测到它必须先对`w`和`x`求值。有一点很重要，之前求得的`w`和`x`不会被重用。
