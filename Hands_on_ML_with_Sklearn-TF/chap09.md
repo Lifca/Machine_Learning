@@ -77,9 +77,9 @@ f = x*x*y + y + 2
 
 ```python
 with tf.Session() as sess:
-	x.initializer.run()
-	y.initializer.run()
-	result = f.eval()
+    x.initializer.run()
+    y.initializer.run()
+    result = f.eval()
 ```
 
 在`with`块代码中，会话被设置为默认会话。调用`x.initializer.run()`和调用`tf.get_default_session().run(x.initializer)`是等效的，类似地，调用`f.eval()`和调用`tf.get_default_session().run(f)`也是等效的。这样就增加了代码的可读性。此外，会话会在块代码的最后自动关闭。
@@ -89,8 +89,8 @@ with tf.Session() as sess:
 ```python
 init = tf.global_variables_initializer()  # 准备初始化节点
 with tf.Session() as sess:
-	init.run()	# 事实上初始化了所有变量
-	result = f.eval()
+    init.run()	# 事实上初始化了所有变量
+    result = f.eval()
 ```
 
 在 Jupyter 或者 Python Shell 中，你可能会偏于创建一个`InteractiveSession`。它与常规`Session`的唯一区别是当`InteractiveSession`被创建时，它会自动被设为默认会话，所以你不需要再写一个`with`块了（但是当你完事后，你需要手动关闭会话）。
@@ -142,8 +142,8 @@ x = w + 2
 y = x + 5
 z = x * 3
 with tf.Session() as sess:
-	print(y.eval())	  # 10
-	print(z.eval())	  # 15
+    print(y.eval())	  # 10
+    print(z.eval())	  # 15
 ```
 
 首先，代码定义了一个非常简单的图。之后它启动了会话，运行图来对`y`求值： Tensorflow 自动检测到`y`依赖于`x`，而`x`依赖于`w`，所以它会优先计算`w`，然后是`x`，再是`y`，之后返回`y`的值。最后，代码运行图来求`z`的值。再次强调， Tensorflow 检测到它必须先对`w`和`x`求值。有一点很重要，之前求得的`w`和`x`不会被重用。简而言之，之前的代码会计算`w`和`x`两次。
@@ -154,9 +154,9 @@ with tf.Session() as sess:
 
 ```python
 with tf.Session() as sess:
-	y_val, z_val = sess.run([y, z])
-	print(y_val)		# 10
-	print(z_val)		# 15
+    y_val, z_val = sess.run([y, z])
+    print(y_val)    # 10
+    print(z_val)    # 15
 ```
 
 > **警告**
@@ -164,4 +164,36 @@ with tf.Session() as sess:
 
 ## Tensorflow 实现线性回归
 
-Tensorflow 操作（也简称为 *ops* ）可以接收任意数量的输入，生成任意数量的输出。例如，加法和乘法操作接收两个输入，生成一个输出。
+Tensorflow 操作（也简称为 *ops* ）可以接收任意数量的输入，生成任意数量的输出。例如，加法和乘法操作接收两个输入，生成一个输出。常量和变量无需输入（被称为源操作（*source ops*））。输入与输出是多维数组，被称为**张量**（*tensors*，也是名字 “tensor flow” 的由来）。就像 NumPy 的数组，张量也有类型和形状。事实上，在 Python API 中，张量可以简单地用 NumPy 数组来表示。它们通常包含浮点数，不过你也可以让它们来承载字符串（任意字节的数组）。
+
+迄今为止的样例中，张量只包含了单个标量值，不过你当然可以对任何形状的数组进行计算。例如，下面的代码操作二维数组，在加利福尼亚房价数据集上实现了线性回归（在第二章介绍过）。它从获取数据开始，之后在所有训练实例上添加一个额外的偏置输入特征（ ![x_0=1](http://latex.codecogs.com/gif.latex?x_0%3D1) ）（这一步使用了 NumPy ，所以能立即运行）；再之后它会创建两个 Tensorflow 常量节点`X`和`y`来保存数据和目标，并用一部分 Tensorflow 提供的矩阵操作定义`theta`。这些矩阵函数——`transpose()`，`matmul()`和`matrix_inverse()`——都是不言自明的，不过和往常一样，它们并不会立即执行计算。相反地，它们在图中创建节点，在图运行的时候节点就会执行。你也许意识到了`theta`的定义对应于正规方程（见第四章）。最后，这些节点创建一个会话，用它来计算`theta`。
+
+```python
+import numpy as np
+from sklearn.datasets import fetch_california_housing
+housing = fetch_california_housing()
+m, n = housing.data.shape
+housing_data_plus_bias = np.c_[np.ones((m, 1)), housing.data]
+X = tf.constant(housing_data_plus_bias, dtype=tf.float32, name="X")
+y = tf.constant(housing.target.reshape(-1, 1), dtype=tf.float32, name="y")
+XT = tf.transpose(X)
+theta = tf.matmul(tf.matmul(tf.matrix_inverse(tf.matmul(XT, X)), XT), y)
+with tf.Session() as sess:
+    theta_value = theta.eval()
+```
+
+如果你有 GPU 的话，和直接用 NumPy 计算正规方程相比，这段代码的主要优点是 Tensorflow 会自动在你的 GPU 上运行（如果你安装了有 GPU 支持的 Tensorflow ，当然，详见第十二章）。
+
+## 实现梯度下降
+
+让我们来试试使用批量梯度下降（在第四章介绍过），而不用正规方程。首先，我们会手动计算梯度，之后我们会使用 Tensorflow 的 autodiff 功能来使 Tensorflow 自动计算梯度，最后我们会使用一些 Tensorflow 的箱外优化器。
+
+> **警告**
+> 当你使用梯度下降时，记住首先标准化输入特征向量是很重要的，否则训练可能会很慢。你可以通过 Tensorflow 、 NumPy 、 Scikit-Learn 的`StandardScaler`，或者其他你更偏好的解决方法来完成这一步。下面的代码假设标准化已经完成。
+
+### 手动计算梯度
+
+下面的代码应该相当容易看懂，除了一些新的元素：
+
+- `random_uniform()`函数在图中创建一个新的节点，会生成一个包含了随机值的张量，给定形状和值域，类似 NumPy 的`rand()`函数。
+- `assign()`函数创建一个节点，它会赋给变量新值。在本例中，它实现了
