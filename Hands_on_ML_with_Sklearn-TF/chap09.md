@@ -171,13 +171,16 @@ Tensorflow 操作（也简称为 *ops* ）可以接收任意数量的输入，�
 ```python
 import numpy as np
 from sklearn.datasets import fetch_california_housing
+
 housing = fetch_california_housing()
 m, n = housing.data.shape
 housing_data_plus_bias = np.c_[np.ones((m, 1)), housing.data]
+
 X = tf.constant(housing_data_plus_bias, dtype=tf.float32, name="X")
 y = tf.constant(housing.target.reshape(-1, 1), dtype=tf.float32, name="y")
 XT = tf.transpose(X)
 theta = tf.matmul(tf.matmul(tf.matrix_inverse(tf.matmul(XT, X)), XT), y)
+
 with tf.Session() as sess:
     theta_value = theta.eval()
 ```
@@ -186,7 +189,7 @@ with tf.Session() as sess:
 
 ## 实现梯度下降
 
-让我们来试试使用批量梯度下降（在第四章介绍过），而不用正规方程。首先，我们会手动计算梯度，之后我们会使用 Tensorflow 的 autodiff 功能来使 Tensorflow 自动计算梯度，最后我们会使用一些 Tensorflow 的箱外优化器。
+让我们来试试使用批量梯度下降（在第四章介绍过），而不用正规方程。首先，我们会手动计算梯度，之后我们会使用 Tensorflow 的 autodiff 功能来使 Tensorflow 自动计算梯度，最后我们会使用一些 Tensorflow 现成的优化器。
 
 > **警告**
 > 当你使用梯度下降时，记住首先标准化输入特征向量是很重要的，否则训练可能会很慢。你可以通过 Tensorflow 、 NumPy 、 Scikit-Learn 的`StandardScaler`，或者其他你更偏好的解决方法来完成这一步。下面的代码假设标准化已经完成。
@@ -196,4 +199,49 @@ with tf.Session() as sess:
 下面的代码应该相当容易看懂，除了一些新的元素：
 
 - `random_uniform()`函数在图中创建一个新的节点，会生成一个包含了随机值的张量，给定形状和值域，类似 NumPy 的`rand()`函数。
-- `assign()`函数创建一个节点，它会赋给变量新值。在本例中，它实现了
+- `assign()`函数创建一个节点，它会赋给变量新值。在本例中，它实现了批量梯度下降的步骤 ![\theta^{(\mathrm{next\;step})}=\theta-\eta\nabla_{\theta}\mathrm{MSE}(\theta)](http://latex.codecogs.com/gif.latex?%5Ctheta%5E%7B%28%5Cmathrm%7Bnext%5C%3Bstep%7D%29%7D%3D%5Ctheta-%5Ceta%5Cnabla_%7B%5Ctheta%7D%5Cmathrm%7BMSE%7D%28%5Ctheta%29) 。
+- 主要的循环会一遍遍执行训练步骤（共`n_epochs`次），每 100 次循环都会打印当前的均方误差（`mse`）。你应该看到每次迭代均方误差都在下降。
+
+```python
+n_epochs = 1000
+learning_rate = 0.01
+
+X = tf.constant(scaled_housing_data_plus_bias, dtype=tf.float32, name="X")
+y = tf.constant(housing.target.reshape(-1, 1), dtype=tf.float32, name="y")
+theta = tf.Variable(tf.random_uniform([n + 1, 1], -1.0, 1.0), name="theta")
+y_pred = tf.matmul(X, theta, name="predictions")
+error = y_pred - y
+mse = tf.reduce_mean(tf.square(error), name="mse")
+gradients = 2/m * tf.matmul(tf.transpose(X), error)
+training_op = tf.assign(theta, theta - learning_rate * gradients)
+
+init = tf.global_variables_initializer()
+
+with tf.Session() as sess:
+    sess.run(init)
+    
+    for epoch in range(n_epochs):
+        if epoch % 100 == 0:
+            print("Epoch", epoch, "MSE =", mse.eval())
+        sess.run(training_op)
+        
+    best_theta = theta.eval()
+```
+
+### 使用自动微分
+
+之前的代码运行没问题，但是它需要从损失函数（ MSE ）中利用数学推导梯度。在线性回归的例子中，这相当简单，但是如果你在深度神经网络也这么做，你会有点儿头疼：这将会是乏味而易错的。你可以使用符号微分（*symbolic differentiation*）来自动找到偏导数的方程，不过生成的代码并不一定非常有效。
+
+为了理解原因，考虑函数 f(x)=exp(exp(exp(x))) 。如果你知道微积分，你能求出它的导数 f′(x)=exp(x) × exp(exp(x)) × exp(exp(exp(x))) 。如果你将 f(x) 和 f'(x) 分别按照它们的样子编写代码，那么你的代码不会太有效。更有效的解决方法是写一个函数，先计算 exp(x) ，之后是 exp(exp(x)) ，再是 exp(exp(exp(x))) ，并返回这三个值。这样可以直接得到 f(x) （第三项），如果你需要导数，将三项全部相乘即可。用传统方法你不得不调用`exp`函数九次来计算 f(x) 和 f'(x) ，而用这种方法你只需要调用三次。
+
+当你的函数被任意代码定义时，它会变得更糟。你能找到计算下面函数偏导数的方程（或代码）吗？提示：别试。
+
+```python
+def my_func(a, b):
+    z = 0
+    for i in range(100):
+        z = a * np.cos(z + i) + z * np.sin(b - i)
+    return z
+```
+
+幸运的是， Tensorflow 的自动微分功能可以帮上忙：它会自动而高效地为你计算
