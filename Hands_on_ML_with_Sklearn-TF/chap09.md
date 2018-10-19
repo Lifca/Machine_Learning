@@ -267,3 +267,33 @@ optimizer = tf.train.GradientDescentOptimizer(learning_rate=learning_rate)
 training_op = optimizer.minimize(mse)
 ```
 
+如果你想使用不同类型的优化器，你只需要改动一行代码。例如，你可以像这样定义优化器，来使用动量优化器（它通常比梯度下降收敛更快，见第十一章）：
+
+```python
+optimizer = tf.train.MomentumOptimizer(learning_rate=learning_rate, momentum=0.9)
+```
+
+## 为训练算法提供数据
+
+让我们修改之前的代码，实现小批量梯度下降。因此，我们需要一种在每个迭代中用下一个小批量替换`X`和`y`的方法。最简单的方法是使用占位符节点。这些节点是特别的，因为它们并不进行任何计算，它们只输出你在运行时让它们输出的数据。它们通常用于在训练时将训练数据传递给 Tensorflow 。如果你在运行时没有给占位符指定值，会发生异常。
+
+要创建占位符节点，你必须调用`placeholder()`函数，并指定输出张量的数据类型。你也可以选择指定它的形状。如果指定一个维度为`None`，意味着“任意大小”。例如，下面的代码创建了占位符节点`A`，以及节点`B = A + 5`。当我们计算`B`的值时，我们将`feed_dict`传给指定`A`值的`eval()`方法。注意，`A`必须是 2 级的（即，它必须是二维的），并且必须有三列（否则会产生异常），不过可以有任意数量的行。
+
+```python
+>>> A = tf.placeholder(tf.float32, shape=(None, 3))
+>>> B = A + 5
+>>> with tf.Session() as sess:
+...     B_val_1 = B.eval(feed_dict={A: [[1, 2, 3]]})
+...     B_val_2 = B.eval(feed_dict={A: [[4, 5, 6], [7, 8, 9]]})
+...
+>>> print(B_val_1)
+[[ 6.  7.  8.]]
+>>> print(B_val_2)
+[[  9.  10.  11.]
+ [ 12.  13.  14.]]
+```
+
+> **笔记**
+> 其实你可以提供任意操作的输出，不仅仅是占位符的。在本例中， Tensorflow 并不对这些操作求值，它只使用你提供的数据。
+
+为了实现小批量梯度下降，我们只能
