@@ -244,4 +244,26 @@ def my_func(a, b):
     return z
 ```
 
-幸运的是， Tensorflow 的自动微分功能可以帮上忙：它会自动而高效地为你计算
+幸运的是， Tensorflow 的自动微分功能可以帮上忙：它会自动而高效地为你计算梯度。只需简单地将上一节梯度下降代码中`gradients = ...`这一行替换为下面的一行代码，它会继续正常运行。
+
+```python
+gradients = tf.gradients(mse, [theta])[0]
+```
+
+`gradients()`函数获取了 op （本例中是`mse`）和一个变量列表（本例中只有`theta`），它为每个变量创建了 op 列表，来计算 op 关于每个变量的梯度。所以`gradients`节点会计算均方误差对于`theta`的梯度向量。
+
+有四种自动计算梯度的主要方法。表 9-2 进行了总结。 Tensorflow 使用反向模式自动微分（*reverse-mode autodiff*），当输入很多、输出很少时它的表现很完美（高效而准确），比如在神经网络中。它只需遍历图 ![n_{\mathrm{outputs}}+1](http://latex.codecogs.com/gif.latex?n_%7B%5Cmathrm%7Boutputs%7D%7D&plus;1) 次就能计算所有输出关于输入的偏导数。
+
+![table](./images/chap09/9-table.png)
+
+如果你对它的工作原理感兴趣，请参阅附录 D 。
+
+### 使用优化器
+
+Tensorflow 会为你计算梯度。不过可以更简单：它也提供了许多现成的优化器，包括梯度下降优化器。你可以简单地把之前的`gradients = ...`和`training_op = ...`替换为下面的代码，一切都会正常工作：
+
+```python
+optimizer = tf.train.GradientDescentOptimizer(learning_rate=learning_rate)
+training_op = optimizer.minimize(mse)
+```
+
