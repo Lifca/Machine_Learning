@@ -358,3 +358,100 @@ with tf.Session() as sess:
 
 恢复模型也一样简单：像之前一样在构造阶段的最后创建`Saver`，不过在执行阶段的开始，不用`init`节点初始化变量，而是调用`Saver`对象的`restore()`方法：
 
+```python
+with tf.Session() as sess:
+    saver.restore(sess, "/tmp/my_model_final.ckpt")
+    [...]
+```
+
+`Saver`默认保存和恢复所有名下的变量，不过如果你需要更多的控制，你可以指定要保存或恢复的具体变量，以及要使用的名字。例如，下面的`Saver`只会保存在名字`weights`名下的`theta`变量。
+
+```python
+saver = tf.train.Saver({"weights": theta})
+```
+
+### 可视化图与使用 TensorBoard 的训练曲线
+
+所以现在我们有了用小批量梯度下降训练了线性回归模型的计算图，并且定期保存检查点。听起来很复杂是吧？不过，我们仍然依赖`print()`函数来可视化训练的过程。有一种更好的方法：选择 TensorBoard。如果你提供给它一些统计数据，它就会在你的网页浏览器上显示统计数据的交互式可视化（比如，学习曲线）。你也能提供给它图的定义，它会给你到浏览器的优秀接口。这对于在图中识别错误、寻找瓶颈层等等很有用。
+
+第一步是调整你的程序，让它可以将图的定义和一些训练统计数据——比如说，训练误差（ MSE ）——写入 TensorBoard 能读取的日志目录。每次运行程序你都需要使用不同的日志目录，否则 TensorBoard 会将不同来源的统计数据混合，会把视图弄乱。最简单的解决方法是在日志目录名字中加入时间戳。在程序的开始加入下面的代码：
+
+```python
+from datetime import datetime
+
+now = datetime.utcnow().strftime("%Y%m%d%H%M%S")
+root_logdir = "tf_logs"
+logdir = "{}/run-{}/".format(root_logdir, now)
+```
+
+接下来，在构造阶段的最后加入下面的代码：
+
+```python
+mse_summary = tf.summary.scalar('MSE', mse)
+file_writer = tf.summary.FileWriter(logdir, tf.get_default_graph())
+```
+
+第一行在图中创建了一个节点，它计算均方误差的值，并将其写入称为 *summary* 的兼容 TensorBoard 的二进制日志字符串。第二行创建了一个`FileWriter`，你会用于将总结写入日志目录的日志文件中。第一个参数表明日志文件的路径（本例中是形如 *tf_logs/run-20160906091959/* 的字符串，相对于当前目录）。第二个（可选的）参数是你想要可视化的图。一经创建，如果日志目录不存在，`FileWriter`便会自行创建（如有需要，还会创建它的父目录），并将图的定义写入被称为事件文件（*events file*）的二进制日志文件。
+
+接下来你需要更新执行阶段，在训练期间有规律地计算`mse_summary`节点（比如每 10 个小批量）。它会输出一个总结，你稍后可以用`file_writer`将它写入事件文件中。以下是更新后的代码：
+
+```python
+[...]
+for batch_index in range(n_batches):
+    X_batch, y_batch = fetch_batch(epoch, batch_index, batch_size)
+    if batch_index % 10 == 0:
+        summary_str = mse_summary.eval(feed_dict={X: X_batch, y: y_batch})
+        step = epoch * n_batches + batch_index
+        file_writer.add_summary(summary_str, step)
+    sess.run(training_op, feed_dict={X: X_batch, y: y_batch})
+[...]
+```
+
+> **警告**
+> 要避免，因为它会大幅降低训练速度。
+
+最终，你要在程序的最后关闭`FileWriter`：
+
+```python
+file_writer.close()
+```
+
+现在运行这个程序：它会创建日志目录并写入一个事件文件，包括图的定义和均方误差的值。打开一个 shell 终端，前往工作目录，输入`ls -l tf_logs/run*`列出日志目录的所有内容：
+
+```
+$ cd $ML_PATH # Your ML working directory (e.g., $HOME/ml)
+$ ls -l tf_logs/run*
+total 40
+-rw-r--r-- 1 ageron staff 18620 Sep 6 11:10 events.out.tfevents.1472553182.mymac
+```
+
+如果你再次运行程序，你会在 *tf_logs/* 目录中看到第二个目录：
+
+```
+$ ls -l tf_logs/
+total 0
+drwxr-xr-x 3 ageron staff 102 Sep 6 10:07 run-20160906091959
+drwxr-xr-x 3 ageron staff 102 Sep 6 10:22 run-20160906092202
+```
+
+很好！是时候启动 TensorBoard 服务器了。你需要激活你的`virtualenv`环境，之后通过运行`tensorboard`命令来打开服务器，指向根日志目录。这样会打开 TensorBoard 的网页服务器，监听端口 6006 （就是倒着写的 “goog” ）。
+
+```
+$ source env/bin/activate
+$ tensorboard --logdir tf_logs/
+Starting TensorBoard on port 6006
+(You can navigate to http://0.0.0.0:6006)
+```
+
+接下来打开浏览器，前往 [http://0.0.0.0:6006/](http://0.0.0.0:6006/) （或 [http://localhost:6006/](http://localhost:6006/) ）。欢迎来到 TensorBoard ！在 Event 选项卡中你应该看右边的均方误差。如果你进行点击，你会看到不同 runs 的均方误差在训练中的曲线（图 9-3 ）。你可以检查或不检查你想见的 runs ，放大或缩小，悬停在曲线上获取更多细节等等。
+
+![3](./images/chap09/9-3.png)
+
+现在点击 Graph 选项卡。你应该看图 9-4 中的图表。
+
+为了减少混乱，有许多边（即连接其他节点）的节点被分离到右边的辅助区域，
+
+![4](./images/chap09/9-4.png)
+
+> **提示**
+> 
