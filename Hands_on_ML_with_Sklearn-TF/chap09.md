@@ -372,9 +372,9 @@ saver = tf.train.Saver({"weights": theta})
 
 ### 可视化图与使用 TensorBoard 的训练曲线
 
-所以现在我们有了用小批量梯度下降训练了线性回归模型的计算图，并且定期保存检查点。听起来很复杂是吧？不过，我们仍然依赖`print()`函数来可视化训练的过程。有一种更好的方法：选择 TensorBoard。如果你提供给它一些统计数据，它就会在你的网页浏览器上显示统计数据的交互式可视化（比如，学习曲线）。你也能提供给它图的定义，它会给你到浏览器的优秀接口。这对于在图中识别错误、寻找瓶颈层等等很有用。
+所以现在我们有了用小批量梯度下降训练了线性回归模型的计算图，并且定期保存检查点。听起来很复杂是吧？不过，我们仍然依赖`print()`函数来可视化训练的过程。有一种更好的方法：选择 TensorBoard 。如果你提供给它一些统计数据，它就会在你的网页浏览器上显示统计数据的交互式可视化（比如，学习曲线）。你也能提供给它图的定义，它会给你到浏览器的优秀接口。这对于在图中识别错误、寻找瓶颈层等等很有用。
 
-第一步是调整你的程序，让它可以将图的定义和一些训练统计数据——比如说，训练误差（ MSE ）——写入 TensorBoard 能读取的日志目录。每次运行程序你都需要使用不同的日志目录，否则 TensorBoard 会将不同来源的统计数据混合，会把视图弄乱。最简单的解决方法是在日志目录名字中加入时间戳。在程序的开始加入下面的代码：
+第一步是调整你的程序，以便将图的定义和一些训练统计数据——比如说，训练误差（ MSE ）——写入 TensorBoard 能读取的日志目录。每次运行程序你都需要使用不同的日志目录，否则 TensorBoard 会将不同 runs 的统计数据混合，会把视图弄乱。最简单的解决方法是在日志目录名字中加入时间戳。在程序的开始加入下面的代码：
 
 ```python
 from datetime import datetime
@@ -391,9 +391,9 @@ mse_summary = tf.summary.scalar('MSE', mse)
 file_writer = tf.summary.FileWriter(logdir, tf.get_default_graph())
 ```
 
-第一行在图中创建了一个节点，它计算均方误差的值，并将其写入称为 *summary* 的兼容 TensorBoard 的二进制日志字符串。第二行创建了一个`FileWriter`，你会用于将总结写入日志目录的日志文件中。第一个参数表明日志文件的路径（本例中是形如 *tf_logs/run-20160906091959/* 的字符串，相对于当前目录）。第二个（可选的）参数是你想要可视化的图。一经创建，如果日志目录不存在，`FileWriter`便会自行创建（如有需要，还会创建它的父目录），并将图的定义写入被称为事件文件（*events file*）的二进制日志文件。
+第一行在图中创建了一个节点，它计算均方误差的值，并将其写入称为 *summary* 的兼容 TensorBoard 的二进制日志字符串中。第二行创建了一个`FileWriter`，你会用于将 summary 写入日志目录的日志文件中。第一个参数表明日志文件的路径（本例中是形如 *tf_logs/run-20160906091959/* 的字符串，相对于当前目录）。第二个（可选的）参数是你想要可视化的图。一经创建，如果日志目录不存在，`FileWriter`便会自行创建（如有需要，还会创建它的父目录），并将图的定义写入被称为事件文件（*events file*）的二进制日志文件。
 
-接下来你需要更新执行阶段，在训练期间有规律地计算`mse_summary`节点（比如每 10 个小批量）。它会输出一个总结，你稍后可以用`file_writer`将它写入事件文件中。以下是更新后的代码：
+接下来你需要更新执行阶段，在训练期间有规律地计算`mse_summary`节点（比如每 10 个小批量）。它会输出一个 summary ，你稍后可以用`file_writer`将它写入事件文件中。以下是更新后的代码：
 
 ```python
 [...]
@@ -408,7 +408,7 @@ for batch_index in range(n_batches):
 ```
 
 > **警告**
-> 要避免，因为它会大幅降低训练速度。
+> 要避免在每一步训练时记录训练数据，因为它会大幅降低训练速度。
 
 最终，你要在程序的最后关闭`FileWriter`：
 
@@ -443,15 +443,61 @@ Starting TensorBoard on port 6006
 (You can navigate to http://0.0.0.0:6006)
 ```
 
-接下来打开浏览器，前往 [http://0.0.0.0:6006/](http://0.0.0.0:6006/) （或 [http://localhost:6006/](http://localhost:6006/) ）。欢迎来到 TensorBoard ！在 Event 选项卡中你应该看右边的均方误差。如果你进行点击，你会看到不同 runs 的均方误差在训练中的曲线（图 9-3 ）。你可以检查或不检查你想见的 runs ，放大或缩小，悬停在曲线上获取更多细节等等。
+接下来打开浏览器，前往 [http://0.0.0.0:6006/](http://0.0.0.0:6006/) （或 [http://localhost:6006/](http://localhost:6006/) ）。欢迎来到 TensorBoard ！在 Events 选项卡中你应该看右边的均方误差。如果你进行点击，你会看到不同 runs 的均方误差在训练中的曲线（图 9-3 ）。你可以检查或不检查你想见的 runs ，放大或缩小，悬停在曲线上获取更多细节等等。
 
 ![3](./images/chap09/9-3.png)
 
 现在点击 Graph 选项卡。你应该看图 9-4 中的图表。
 
-为了减少混乱，有许多边（即连接其他节点）的节点被分离到右边的辅助区域，
+为了减少混乱，有许多边（即连接其他节点）的节点被分离到右边的辅助区域（你可以通过右键在主图和辅助区域之间来回移动一个节点）。在默认情况下，图的某些部分也会崩溃。例如，尝试在`gradients`节点上悬停，点击 ![\oplus](https://latex.codecogs.com/gif.latex?%5Coplus) 图标来扩展它的子图。接下来，在子图中试着扩展`mse_grad`子图。
 
 ![4](./images/chap09/9-4.png)
 
 > **提示**
-> 
+> 如果你想直接看一眼 Jupyter 内的图，在本章你可以使用 notebook 中可用的`show_graph()`函数。它最初是由 A. Mordvintsev 写于伟大的 [deepdream tutorial notebook](http://goo.gl/EtCWUc) 。另一种选择是下载 E. Jang 的 [TensorFlow debugger tool](https://github.com/ericjang/tdb) ，它包含了 Jupyter 的图形可视化扩展（及更多）。
+
+## 命名域
+
+在处理像神经网络这样更复杂的模型时，图很有可能被数千节点弄乱。为了避免这种情况，你可以创建**命名域**（*name scopes*）对相关节点进行分组。例如，让我们修改之前的代码，用一个叫做`"loss"`的命名域来定义`error`和`mse`操作：
+
+```python
+with tf.name_scope("loss") as scope:
+    error = y_pred - y
+    mse = tf.reduce_mean(tf.square(error), name="mse")
+```
+
+每个操作在命名域中定义的名字现在加上了`"loss/"`前缀：
+
+```python
+>>> print(error.op.name)
+loss/sub
+>>> print(mse.op.name)
+loss/mse
+```
+在 TensorBoard 中，`mse`和`error`节点现在出现在`loss`命名空间中了，默认情况下会发生崩溃（图 9-5 ）。
+
+![5](./images/chap09/9-5.png)
+
+## 模块化
+
+假设你想创建一个图，将两个**整流线性单元**（*rectified linear units*，ReLU）相加。 ReLU 计算输入的线性函数，如果为正输出结果，否则输出 0 ，如公式 9-1 所示。
+
+![h_{\mathbf{w},x}(\mathbf{X})=\max(\mathbf{X}\cdot\mathbf{w}+b,0)](https://latex.codecogs.com/gif.latex?h_%7B%5Cmathbf%7Bw%7D%2Cx%7D%28%5Cmathbf%7BX%7D%29%3D%5Cmax%28%5Cmathbf%7BX%7D%5Ccdot%5Cmathbf%7Bw%7D&plus;b%2C0%29)
+
+下面的代码实现了这一功能，但重复性很高：
+
+```python
+n_features = 3
+X = tf.placeholder(tf.float32, shape=(None, n_features), name="X")
+w1 = tf.Variable(tf.random_normal((n_features, 1)), name="weights1")
+w2 = tf.Variable(tf.random_normal((n_features, 1)), name="weights2")
+b1 = tf.Variable(0.0, name="bias1")
+b2 = tf.Variable(0.0, name="bias2")
+z1 = tf.add(tf.matmul(X, w1), b1, name="z1")
+z2 = tf.add(tf.matmul(X, w2), b2, name="z2")
+relu1 = tf.maximum(z1, 0., name="relu1")
+relu2 = tf.maximum(z1, 0., name="relu2")
+output = tf.add(relu1, relu2, name="output")
+```
+
+如此重复的代码很难维护，且容易出错（事实上，这段代码含有复制粘贴错误，你发现了吗？）。
