@@ -29,14 +29,14 @@
 
 来开始吧！假设你已经在第二章跟着安装说明安装了 Jupyter 和 Scikit-Learn ，你可以简单地使用 pip 来安装 Tensorflow 。如果你使用 virtualenv 构建了独立环境，你首先需要激活它：
 
-```python
+```
 $ cd $ML_PATH   # 你的机器学习工作路径(e.g., $HOME/ml)
 $ source env/bin/activate
 ```
 
 接下来，安装 Tensorflow ：
 
-```python
+```
 pip3 install --upgrade tensorflow
 ```
 
@@ -45,7 +45,7 @@ pip3 install --upgrade tensorflow
 
 输入以下命令，来测试你的安装。它应该输出你安装的 Tensorflow 版本。
 
-```python
+```
 $ python3 -c 'import tensorflow; print(tensorflow.__version__)'
 1.0.0
 ```
@@ -296,4 +296,65 @@ optimizer = tf.train.MomentumOptimizer(learning_rate=learning_rate, momentum=0.9
 > **笔记**
 > 其实你可以提供任意操作的输出，不仅仅是占位符的。在本例中， Tensorflow 并不对这些操作求值，它只使用你提供的数据。
 
-为了实现小批量梯度下降，我们只能
+为了实现小批量梯度下降，我们只需稍微调整已有的代码。首先改变`X`和`y`在构造阶段的定义，把它们变为占位符节点：
+
+```python
+X = tf.placeholder(tf.float32, shape=(None, n + 1), name="X")
+y = tf.placeholder(tf.float32, shape=(None, 1), name="y")
+```
+
+之后定义批量大小，并计算批量的总数：
+
+```python
+batch_size = 100
+n_batches = int(np.ceil(m / batch_size))
+```
+
+最后，在执行阶段逐一获取小批量，当对依赖于`X`或`y`的节点求值时，通过`feed_dict`参数提供`X`和`y`的值。
+
+```python
+def fetch_batch(epoch, batch_index, batch_size):
+    [...]  # 从硬盘加载数据
+    return X_batch, y_batch
+with tf.Session() as sess:
+    sess.run(init)
+
+    for epoch in range(n_epochs):
+        for batch_index in range(n_batches):
+            X_batch, y_batch = fetch_batch(epoch, batch_index, batch_size)
+            sess.run(training_op, feed_dict={X: X_batch, y: y_batch})
+            
+    best_theta = theta.eval()
+```
+
+> **笔记**
+> 在计算`theta`时，我们不需要传递`X`和`y`的值，因为`theta`不依赖于它们。
+
+## 保存与恢复模型
+
+一旦你训练好了模型，应该将参数保存在硬盘，所以你可以随时回来、在另一个程序中使用它、将它与其他模型进行比较等等。此外，你也许想在训练时定期保存检查点，这样即便在训练时计算机发生崩溃，你也可以从最后一个检查点继续运行，而不必从头开始。
+
+Tensorflow 的保存与恢复模型十分简单。只需在构造阶段的最后（所有变量节点都创建好之后）创建`Saver`节点；之后在执行阶段，在你想保存模型的时候只需调用`save()`方法，将会话和检查点文件的路径出传给它。
+
+```python
+[...]
+theta = tf.Variable(tf.random_uniform([n + 1, 1], -1.0, 1.0), name="theta")
+[...]
+init = tf.global_variables_initializer()
+saver = tf.train.Saver()
+
+with tf.Session() as sess:
+    sess.run(init)
+    
+    for epoch in range(n_epochs):
+        if epoch % 100 == 0:  # 每 100 次迭代就设置检查点
+            save_path = saver.save(sess, "/tmp/my_model.ckpt")
+        
+        sess.run(training_op)
+    
+    best_theta = theta.eval()
+    save_path = saver.save(sess, "/tmp/my_model_final.ckpt")
+```
+
+恢复模型也一样简单：像之前一样在构造阶段的最后创建`Saver`，不过在执行阶段的开始，不用`init`节点初始化变量，而是调用`Saver`对象的`restore()`方法：
+
