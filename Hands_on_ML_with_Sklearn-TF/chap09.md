@@ -500,4 +500,68 @@ relu2 = tf.maximum(z1, 0., name="relu2")
 output = tf.add(relu1, relu2, name="output")
 ```
 
-如此重复的代码很难维护，且容易出错（事实上，这段代码含有复制粘贴错误，你发现了吗？）。
+如此重复的代码很难维护，且容易出错（事实上，这段代码含有复制粘贴错误，你发现了吗？）。如果你想加入更多的 ReLU ，它可能会变得更糟。幸运的是， Tensorflow 会让你保持 DRY （ Don’t Repeat Yourself ，不要重复自己）：只创建一个函数来构建 ReLU 。下面的代码会创建 5 个 ReLU ，并输出它们的总和（注意，`add_n()`会计算张量列表的总和）。
+
+```python
+def relu(X):
+    w_shape = (int(X.get_shape()[1]), 1)
+    w = tf.Variable(tf.random_normal(w_shape), name="weights")
+    b = tf.Variable(0.0, name="bias")
+    z = tf.add(tf.matmul(X,	w), b, name="z")
+    return tf.maximum(z, 0., name="relu")
+
+n_features = 3
+X = tf.placeholder(tf.float32, shape=(None, n_features), name="X")
+relus = [relu(X) for i in range(5)]
+output = tf.add_n(relus, name="output")
+```
+
+注意，当你创建一个节点时， Tensorflow 会检查它的名称是否已存在，如果已存在，它会附加下划线，后面跟上索引，使该名称唯一。所以第一个 ReLU 包含名为`"weights"`，`"bias"`，`"z"`和`"relu"`（加上默认名称的更多节点，比如`"MatMul"`）；第二个 ReLU 包含名为`"weights_1"`，`"bias_1"`，以此类推的节点；第三个 ReLU 同理，包含`"weights_2"`，`"bias_2"`等等的节点。 TensorBoard 会识别这样的系列，将它们折叠以减少混乱（见图 9-6 ）。
+
+![6](./images/chap09/9-6.png)
+
+使用命名域可以使图更清晰。简单地将所有`relu()`的内容移到同一个命名域中。图 9-7 展示了生成的图。注意 Tensorflow 也通过附加`_1`，`_2`等等使命名域唯一。
+
+```python
+def relu(X):
+    with tf.name_scope("relu"):
+        [...]
+```
+
+![7](./images/chap09/9-7.png)
+
+## 共享变量
+
+如果你想要在图的多个组件间共享变量，一种简单的选择是先创建好，再将它作为参数传递给需要它的函数。例如，假设你想要使用所有 ReLU 共享的变量`threshold`控制 ReLU 的阈值（现在被硬编码为 0 ）。你可以先创建变量，再将它传递给`relu()`函数：
+
+```python
+def relu(X, threshold):
+    with tf.name_scope("relu"):
+        [...]
+        return tf.maximum(z, threshold, name="max")
+        
+threshold = tf.Variable(0.0, name="threshold")
+X = tf.placeholder(tf.float32, shape=(None, n_features), name="X")
+relus = [relu(X, threshold) for i in range(5)]
+output = tf.add_n(relus, name="output")
+```
+
+这段代码运行良好：现在你可以通过`threshold`变量控制所有 ReLU 的阈值了。然而，如果就像这里一样，有许多共享变量，总是得将它们作为参数传递是很痛苦的。有些人会创建一个 Python 目录，包含模型中所有的参数，将它传递给每个函数。还有的人会为每个模块创建一个类（比如使用类变量来处理共享参数的`ReLU`类）。还有一种选择是在第一次调用时将共享变量设为`relu()`函数的属性，如下所示：
+
+```python
+def relu(X):
+    with tf.name_scope("relu"):
+        if not hasattr(relu, "threshold"):
+            relu.threshold = tf.Variable(0.0, name="threshold")
+        [...]
+        return tf.maximum(z, relu.threshold, name="max")
+```
+
+Tensorflow 提供了另一种选择，代码可能比之前的解法更清晰和模块化。这种方法起初有一点难理解，不过因为它在 Tensorflow 中多次使用，值得一探个中奥秘。思路是使用`get_variable()`函数，如果共享变量不存在，则新建一个，如果已存在就重用。所需的行为（创建或重用）由当前`variable_scope()`的属性控制。例如，下面的代码会创建一个名为`"relu/threshold"`的变量（作为标量，因为`shape=()`，且使用 0.0 作为初始值）：
+
+```python
+with tf.variable_scope("relu"):
+    threshold = tf.get_variable("threshold", shape=(),
+                                initializer=tf.constant_initializer(0.0))
+```
+
