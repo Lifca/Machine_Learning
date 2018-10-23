@@ -565,3 +565,46 @@ with tf.variable_scope("relu"):
                                 initializer=tf.constant_initializer(0.0))
 ```
 
+注意，如果变量已通过之前调用`get_variable()`创建，代码会引发异常。这种行为能避免错误地重用变量。如果你想重用变量，则需要明确将变量域的`reuse`属性设为`True`（你不必指定形状或初始值）：
+
+```python
+with tf.variable_scope("relu", reuse=True):
+    threshold = tf.get_variable("threshold")
+```
+
+这段代码会获取已存在的`"relu/threshold"`变量，如果不存在的话就报错，如果未创建的话就使用`get_variable()`。或者，你可以通过调用域的`reuse_variables()`方法，在块中将`reuse`属性设置为`True`：
+
+```python
+with tf.variable_scope("relu") as scope:
+    scope.reuse_variables()
+    threshold = tf.get_variable("threshold")
+```
+
+> **警告**
+> 一旦`reuse`被设为`True`，它就不能在块内再被设置回`False`。此外，如果你在其中定义了其他的变量域，它们会自动继承`reuse=True`。最后一点，只有`get_variable()`创建的变量才可以这样重用。
+
+现在你已经具备了让`relu()`函数访问`threshold`变量的所有要素，不再需要再将它作为参数传递：
+
+```python
+def relu(X):
+    with tf.variable_scope("relu", reuse=True):
+        threshold = tf.get_variable("threshold")    # 重用已存在的变量
+        [...]
+        return tf.maximum(z, threshold, name="max")
+        
+X = tf.placeholder(tf.float32, shape=(None, n_features), name="X")
+with tf.variable_scope("relu"):     # 创建变量
+    threshold = tf.get_variable("threshold", shape=(),
+                                initializer=tf.constant_initializer(0.0))
+    
+relus = [relu(X) for relu_index in range(5)]
+output = tf.add_n(relus, name="output")
+```
+
+这段代码首先定义了`relu()`函数，再创建了`relu/threshold`变量（作为会被初始化为 0.0 的标量），调用`relu()`函数建立了五个 ReLU 。`relu()`函数重用`relu/threshold`变量，并创建其他 ReLU 的节点。
+
+> **笔记**
+> 用`get_variable()`创建的变量始终以`variable_scope`的名称作为前缀，
+
+![8](./images/chap09/9-8.png)
+
