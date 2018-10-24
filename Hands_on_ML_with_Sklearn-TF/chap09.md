@@ -604,7 +604,42 @@ output = tf.add_n(relus, name="output")
 这段代码首先定义了`relu()`函数，再创建了`relu/threshold`变量（作为会被初始化为 0.0 的标量），调用`relu()`函数建立了五个 ReLU 。`relu()`函数重用`relu/threshold`变量，并创建其他 ReLU 的节点。
 
 > **笔记**
-> 用`get_variable()`创建的变量始终以`variable_scope`的名称作为前缀，
+> 用`get_variable()`创建的变量始终以`variable_scope`的名称作为前缀（比如`"relu/threshold"`），但是对于其他节点（包括用`tf.Variable()`创建的变量），变量域表现得如同一个新的变量域。特别地，如果已经创建具有相同名称的变量域，那么就添加后缀使名称唯一。例如，之前代码创建的所有节点（除了`threshold`变量）都有前缀`"relu_1/"`到`"relu_5/"`，如图 9-8 所示。
 
 ![8](./images/chap09/9-8.png)
 
+不幸的是，`threshold`变量必须定义在`relu()`函数之外，而 ReLU 的其余部分都在里面。为了解决这个问题，下面的代码在第一次调用时就在`relu()`内创建了`threshold`函数，然后在后续调用中重用。现在`relu()`函数不必再担心命名域或变量分享了：只需调用`get_variable()`，就会创建或重用`threshold`变量（它无需知道是哪种情况）。剩余的代码调用`relu()`五次，确保在第一次调用时设为`reuse=False`，其余的调用则设为`reuse=True`。
+
+```python
+def relu(X):
+    threshold = tf.get_variable("threshold", shape=(),
+                                initializer=tf.constant_initializer(0.0))
+    [...]
+    return tf.maximum(z, threshold, name="max")
+
+X = tf.placeholder(tf.float32, shape=(None, n_features), name="X")
+relus = []
+for relu_index in range(5):
+    with tf.variable_scope("relu", reuse=(relu_index >= 1)) as scope:
+        relus.append(relu(X))
+output = tf.add_n(relus, name="output")
+```
+
+生成的图和之前略有不同，因为共享变量在第一个 ReLU 中（见图 9-9 ）。
+
+![9](./images/chap09/9-9.png)
+
+至此就结束了 Tensorflow 的介绍。在接下来的章节中，我们会讨论更多高级话题，尤其是许多和深度神经网络、卷积神经网络、循环神经网络有关的操作，以及如何使用多线程、队列、多 GPU 和多服务器来扩展 Tensorflow 。
+
+## 练习
+
+1. 和直接执行计算相比，创建计算图的主要优点是什么？主要缺点是什么？
+2. `a_val = a.eval(session=sess)`和`a_val = sess.run(a)`相同吗？
+3. `a_val, b_val = a.eval(session=sess)`，`b.eval(session=sess)`和`a_val, b_val = sess.run([a, b])`相同吗？
+4. 能在同一个会话中运行两张图吗？
+5. 如果你创建了一个包含变量`w`的图`g`，之后开启两个线程，在每个线程中打开一个会话，使用同样的图`g`，每个会话都有变量`w`的备份，还是会共享它？
+6. 变量何时被初始化？何时被销毁？
+7. 占位符和变量有什么区别？
+8. 当你运行图，去计算一个依赖于你未提供值的占位符的操作时会发生什么？如果操作不依赖占位符又会发生什么？
+9. 当你运行图时，你是能提供任何操作的输出值，还是只有占位符的值？
+10. 
