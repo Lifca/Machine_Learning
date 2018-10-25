@@ -252,7 +252,7 @@ gradients = tf.gradients(mse, [theta])[0]
 
 `gradients()`函数获取了 op （本例中是`mse`）和一个变量列表（本例中只有`theta`），它为每个变量创建了 op 列表，来计算 op 关于每个变量的梯度。所以`gradients`节点会计算均方误差对于`theta`的梯度向量。
 
-有四种自动计算梯度的主要方法。表 9-2 进行了总结。 Tensorflow 使用反向模式自动微分（*reverse-mode autodiff*），当输入很多、输出很少时它的表现很完美（高效而准确），比如在神经网络中。它只需遍历图 ![n_{\mathrm{outputs}}+1](http://latex.codecogs.com/gif.latex?n_%7B%5Cmathrm%7Boutputs%7D%7D&plus;1) 次就能计算所有输出关于输入的偏导数。
+有四种自动计算梯度的主要方法。表 9-2 进行了总结。 Tensorflow 使用**反向模式自动微分**（*reverse-mode autodiff*），当输入很多、输出很少时它的表现很完美（高效而准确），比如在神经网络中。它只需遍历图 ![n_{\mathrm{outputs}}+1](http://latex.codecogs.com/gif.latex?n_%7B%5Cmathrm%7Boutputs%7D%7D&plus;1) 次就能计算所有输出关于输入的偏导数。
 
 ![table](./images/chap09/9-table.png)
 
@@ -642,4 +642,12 @@ output = tf.add_n(relus, name="output")
 7. 占位符和变量有什么区别？
 8. 当你运行图，去计算一个依赖于你未提供值的占位符的操作时会发生什么？如果操作不依赖占位符又会发生什么？
 9. 当你运行图时，你是能提供任何操作的输出值，还是只有占位符的值？
-10. 
+10. 如何将变量设定为你想要的任意值（在执行阶段）？
+11. 为了计算损失函数关于 10 个变量的梯度，反向模式自动微分需要遍历图多少次？前向模式自动微分呢？符号微分呢？
+12. 使用 Tensorflow 实现小批量梯度下降的逻辑回归。在卫星训练集上对它训练并评估（在第五章介绍过）。试着加入附加功能：
+- 在能被简单重用的`logistic_regression()`函数内定义图。
+- 训练期间使用`Saver`定期保存检查点，在训练的最后保存最终模型。
+- 如果训练被中断，则在启动时恢复最后一个检查点。
+- 使用好的域定义图，让图在 TensorBoard 中视觉效果良好。
+- 添加摘要，在 TensBoard 中可视化学习曲线。
+- 试着微调一些超参数，比如学习率或小批量大小，观察学习曲线的形状。
