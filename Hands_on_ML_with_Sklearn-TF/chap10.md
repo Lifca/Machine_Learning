@@ -8,4 +8,4 @@ ANN 是深度学习的重要核心。它们是多功能的、强大的、可扩�
 
 ## 从生物到人工神经元
 
-令人惊讶的是，人工神经网络已经存在很久了：它们最初由神经学家 Warren	McCulloch 和数学家 Walter	Pitts 在 1943 年提出。在他们 [里程碑式的论文](https://goo.gl/Ul4mxW) 中，
+令人惊讶的是，人工神经网络已经存在很久了：它们最初由神经学家 Warren	McCulloch 和数学家 Walter	Pitts 在 1943 年提出。在他们 [里程碑式的论文](https://goo.gl/Ul4mxW) 中写道，“神经活动中的内在逻辑运算思想”，McCulloch 和 Pitts 展示了一个简化计算模型，关于生物神经元
